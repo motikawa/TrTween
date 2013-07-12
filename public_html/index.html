@@ -23,9 +23,10 @@
 		<script type="text/javascript" src="easings.js"></script>
 		<script type="text/javascript" src="TrTween.js"></script>
 		<script type="text/javascript">
-			var 
+			var Sine    = jp.contents.easing.Sine,
 			Quart   = jp.contents.easing.Quart,
 			Expo    = jp.contents.easing.Expo,
+			Bounce  = jp.contents.easing.Bounce,
 			TrTween = jp.contents.TrTween.TrTween;
 
 
@@ -38,8 +39,12 @@
 					arr.push(TrTween.tween(div[0],{x:100,y:100},null,1,Quart.easeOut));
 				}
 				TrTween.serial(
-					TrTween.tween($("#box .test")[0],{y:200},null,.5,Quart.easeIn),
-					TrTween.transition($("#box .test")[4],{rotation:145},{rotation:0},1,"easeOutSine"),
+					TrTween.tween($("#box .test")[0],{y:200,scaleX:2,scaleY:2},null,.5,Quart.easeIn),
+					TrTween.transition($("#box .test")[4],{rotation:180},{rotation:0},1,"easeOutSine"),
+					TrTween.parallel(
+						TrTween.bezier($("#box .test")[3],{x:300,y:200},null,{x:150,y:400},1,Bounce.easeOut),
+						TrTween.delay(TrTween.tween($("#box .test")[6],{blur:10},null,1,Sine.easeOut),1)
+					),
 					TrTween.easingTweens(arr,Expo.easeInOut,2)
 				).play()
 				
