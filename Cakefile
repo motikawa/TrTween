@@ -19,7 +19,7 @@ COMMAND_PATH = '/opt/local/node_modules/coffee-script/bin/'
 project_files = [
 	{outfile:"./public_html/TrTween.js",
 	minfile:"./public_html/TrTween.min.js",
-	dir:"./src/jp/contents/TrTween/",
+	dir:"./jp/contents/TrTween/",
 	order:[
 		"../util/Application.coffee",
 		"TrTweenCore.coffee",
