@@ -43,7 +43,8 @@
 					TrTween.transition($("#box .test")[4],{rotation:180},{rotation:0},1,"easeOutSine"),
 					TrTween.parallel(
 						TrTween.bezier($("#box .test")[3],{x:300,y:200},null,{x:150,y:400},1,Bounce.easeOut),
-						TrTween.delay(TrTween.tween($("#box .test")[6],{blur:10},null,1,Sine.easeOut),1)
+						TrTween.delay(TrTween.tween($("#box .test")[6],{blur:10},null,1,Sine.easeOut),1),
+						TrTween.delay(TrTween.animation($("#box .test")[10],{rotationY:150},{rotationY:0},1,"easeOutExpo"),2)
 					),
 					TrTween.easingTweens(arr,Expo.easeInOut,2)
 				).play()

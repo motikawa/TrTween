@@ -227,6 +227,7 @@
         if (dummyStyle[val + 'ransform'] !== void 0) {
           VenderInfo.vender = val.substr(0, val.length - 1);
           VenderInfo.transformName = val + 'ransform';
+          VenderInfo.animationEnd = VenderInfo.vender + "AnimationEnd";
           break;
         }
       }
@@ -1836,7 +1837,7 @@
       mapper.applyProperties(to, false);
       tostr = mapper.getTransformString();
       stostr = mapper.getStyleString();
-      rule = document.createTextNode("@" + cv + "keyframes " + className + "{\n	0%{\n		" + cv + "transform:" + fromstr + ";\n		" + sfromstr + "\n	}\n	100%{\n		" + cv + "transform:" + tostr + ";\n		" + stostr + "\n	}\n}");
+      rule = document.createTextNode("@" + cv + "keyframes " + className + "{\n	0%{\n		" + fromstr + ";\n		" + sfromstr + "\n	}\n	100%{\n		" + tostr + ";\n		" + stostr + "\n	}\n}");
       return [rule, className];
     };
 
@@ -1855,8 +1856,10 @@
       this._state = TweenState.Initialized;
       this._animationName = VenderInfo.vender + "Animation";
       this._animationEnd = VenderInfo.animationEnd;
+      console.log(this._animationEnd);
+      this._animationNameCSS = VenderInfo.cssVender + "animation";
       this._delegate = function() {
-        return _this._onAnimationEnd;
+        return _this._onAnimationEnd();
       };
       this._cid = -1;
       return;
@@ -1865,12 +1868,12 @@
     AnimationTween.prototype.play = function() {
       var _this = this;
       this._state = TweenState.Playing;
-      this._cid = setTimeout(this._delegate, this._duration + 100);
       setTimeout(function() {
         AnimationTween._css.appendChild(_this._rule);
         _this._target.addEventListener(_this._animationEnd, _this._delegate);
         return setTimeout(function() {
           _this._target.style[_this._animationName] = "" + _this._className + " " + _this._duration + "ms " + _this._easing;
+          _this._mapper.transitionStr = "" + _this._animationNameCSS + ": " + _this._className + " " + _this._duration + "ms " + _this._easing + ";";
           return _this._mapper.applyProperties(_this._to, true);
         }, 0);
       }, 0);
@@ -1878,8 +1881,10 @@
 
     AnimationTween.prototype._onAnimationEnd = function() {
       var _this = this;
-      clearTimeout(this._cid);
       this._target.removeEventListener(this._animationEnd, this._delegate);
+      this._mapper.transitionStr = "";
+      this._mapper.applyProperties(this._to, true);
+      AnimationTween._css.removeChild(this._rule);
       setTimeout(function() {
         return _this.finalize();
       }, 0);

@@ -61,10 +61,8 @@ class TransitionTween extends ICSSTween
 		,@_duration + 100)
 		pname = @_parseProps()
 		setTimeout(=>
-			# @_target.addEventListener(@_transitionEnd,@_delegate)
 			@_target.style[@_transitionName] = pname + " " + @_duration + "ms " + @_easing
 			@_mapper.transitionStr = @_transitionNameCSS + ":" + pname + " " + @_duration + "ms " + @_easing + ";"
-			# console.log( @_transitionNameCSS + ":" +"all " + @_duration + "ms " + @_easing + ";")
 			setTimeout(=>
 				mapper.applyProperties(@_to,true)
 			,0)
@@ -72,7 +70,6 @@ class TransitionTween extends ICSSTween
 		return
 	_onTransitionEnd:->
 		clearTimeout(@_cid)
-		# @_target.removeEventListener(@_transitionEnd,@_delegate)
 		@_target.style[@_transitionName] = null
 		@_mapper.transitionStr = ""
 		setTimeout(=>

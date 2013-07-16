@@ -21,11 +21,11 @@ class AnimationTween extends ICSSTween
 		rule = document.createTextNode("""
 			@#{cv}keyframes #{className}{
 				0%{
-					#{cv}transform:#{fromstr};
+					#{fromstr};
 					#{sfromstr}
 				}
 				100%{
-					#{cv}transform:#{tostr};
+					#{tostr};
 					#{stostr}
 				}
 			}
@@ -44,29 +44,31 @@ class AnimationTween extends ICSSTween
 		@_state = TweenState.Initialized
 		@_animationName = VenderInfo.vender+"Animation"
 		@_animationEnd  = VenderInfo.animationEnd
+		console.log(@_animationEnd)
+		@_animationNameCSS = VenderInfo.cssVender + "animation"
 		@_delegate = =>
-			@_onAnimationEnd
+			@_onAnimationEnd()
 
 		@_cid = -1
 		return
 	play:->
 		@_state = TweenState.Playing
-		@_cid = setTimeout(@_delegate,@_duration + 100)
+		
 		setTimeout(=>
 			AnimationTween._css.appendChild(@_rule)
 			@_target.addEventListener(@_animationEnd,@_delegate)
 			setTimeout(=>
 				@_target.style[@_animationName] = "#{@_className} #{@_duration}ms #{@_easing}"
+				@_mapper.transitionStr = "#{@_animationNameCSS}: #{@_className} #{@_duration}ms #{@_easing};"
 				@_mapper.applyProperties(@_to,true)
 			,0)
 		,0)
 		return
 	_onAnimationEnd:->
-		clearTimeout(@_cid)
 		@_target.removeEventListener(@_animationEnd,@_delegate)
-
-#		@_target.style[@_animationName] = null
-#		AnimationTween._css.removeChild(@_rule)
+		@_mapper.transitionStr = ""
+		@_mapper.applyProperties(@_to,true)
+		AnimationTween._css.removeChild(@_rule)
 
 		setTimeout(=>
 			@finalize()

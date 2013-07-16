@@ -40,6 +40,7 @@ class VenderInfo
 			if dummyStyle[val+'ransform'] isnt undefined
 				VenderInfo.vender = val.substr(0, val.length - 1)
 				VenderInfo.transformName = val + 'ransform'
+				VenderInfo.animationEnd = VenderInfo.vender + "AnimationEnd"
 				break
 		if VenderInfo.vender isnt ""
 			VenderInfo.cssVender = '-' + VenderInfo.vender.toLowerCase() + '-'
