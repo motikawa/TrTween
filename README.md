@@ -1,6 +1,6 @@
 TrTween.js
 =======
-
+Javascript Tween Engine for DOM Element
 **lastest version:** 0.1.5
 
 Methods
