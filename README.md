@@ -23,5 +23,8 @@ Methods
 Sample
 --------------------------
 ```js
+//single
+TrTween.tween(document.getElementById("hoge"),{x:100,y:100,alpha:0},null,1,Quart.easeOut).play()
+
 
 ```
