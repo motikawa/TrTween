@@ -1,4 +1,4 @@
-TrTween.js(Javascript Tween Engine for DOM Element)
+TrTween.js
 =======
 
 
