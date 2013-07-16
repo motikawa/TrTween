@@ -30,6 +30,6 @@ TrTween.tween(document.getElementById("hoge"),{x:100,y:100,alpha:0},null,1,Quart
 TrTween.transition(document.getElementById("hoge"),{x:100,y:100,alpha:0},null,1,"easeOutQuart").play()
 //CSS3 transition 
 
-TrTween.animation(document.getElementById("hoge"),{x:100,y:100,alpha:0},null,1,"easeOutQuart").play()
-//CSS3 Animation(bug...)
+TrTween.animation(document.getElementById("hoge"),{x:100,y:100,alpha:0},{x:0,y:0,alpha:1},1,"easeOutQuart").play()
+//CSS3 Animation　from parameter is need
 ```
