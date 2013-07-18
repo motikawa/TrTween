@@ -267,7 +267,8 @@
     Playing: 1,
     Completed: 2,
     Stoped: 3,
-    Finalized: 4
+    Finalized: 4,
+    Overwrited: 5
   };
 
   LinkedList = (function() {
@@ -691,7 +692,6 @@
       _ref = this._hasProperties;
       for (i = 0, _len = _ref.length; i < _len; i++) {
         val = _ref[i];
-        if (val === null) continue;
         obj = p[val];
         v = ((m[val] * 1000) | 0) * .001;
         trstr += obj.prefix + v + obj.sufix;
@@ -728,6 +728,10 @@
       },
       height: {
         prefix: "height:",
+        sufix: "px;"
+      },
+      margin: {
+        prefix: "margin:",
         sufix: "px;"
       },
       marginTop: {
@@ -883,7 +887,6 @@
       _ref = this._hasProperties;
       for (i = 0, _len = _ref.length; i < _len; i++) {
         val = _ref[i];
-        if (val === null) continue;
         obj = p[val];
         if (val === "backgroundPosition") {
           vx = ((m.backgroundPositionX * 1000) | 0) * .001;
@@ -933,6 +936,7 @@
       right: 0,
       width: 0,
       height: 0,
+      margin: 0,
       marginTop: 0,
       marginBottom: 0,
       marginLeft: 0,
@@ -969,12 +973,7 @@
     function PropertyMapper(target) {
       if (!target) throw new Error("target が未設定");
       this._target = target;
-      this._trName = VenderInfo.transformName;
-      this._trcssName = VenderInfo.cssVender + "transform";
-      this._filterName = VenderInfo.cssVender + "filter";
-      this._styleTweens = null;
-      this._trTweens = null;
-      this._filterTweens = null;
+      this._tweens = null;
       this.x = NaN;
       this.y = NaN;
       this.z = NaN;
@@ -1001,6 +1000,7 @@
       this.right = NaN;
       this.width = NaN;
       this.height = NaN;
+      this.margin = NaN;
       this.marginLeft = NaN;
       this.marginTop = NaN;
       this.marginBottom = NaN;
@@ -1009,8 +1009,6 @@
       this.backgroundPositionY = NaN;
       this.visible = "NONE";
       this.display = "";
-      this._needUpdate = false;
-      this._transformVals = [];
       this.transitionStr = "";
       this._trWrapper = new TSW(this);
       this._flWrapper = new FSW(this);
@@ -1025,66 +1023,16 @@
       return;
     }
 
-    PropertyMapper.prototype._initTransformTweenList = function() {
-      this._trTweens = new LinkedList();
-      this._trTweens.push({
-        name: "x",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "y",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "z",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "rotation",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "rotationX",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "rotationY",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "rotationZ",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "skewX",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "skewY",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "scaleX",
-        tween: null
-      });
-      this._trTweens.push({
-        name: "scaleY",
-        tween: null
-      });
-      return this._trTweens;
-    };
-
     PropertyMapper.prototype._registerTweenForFIE = function(tween) {
       var c, f, find, fp, from, name, tl, to;
       to = tween._to;
       from = tween._from;
       c = {};
       for (name in to) {
-        if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY") {
+        if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "margin" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY") {
           this._css2W.pushProperty(name);
-          tl = this._styleTweens || (this._styleTweens = new LinkedList());
+          tl = this._tweens || (this._tweens = new LinkedList());
           fp = 0;
-          this._hasCss2Style = true;
           if (from && !isNaN(from[name])) {
             fp = from[name];
           } else {
@@ -1130,15 +1078,26 @@
           }
           from[name] = fp;
           c[name] = to[name] - fp;
-          tl = this._trTweens || this._initTransformTweenList();
+          tl = this._tweens || (this._tweens = new LinkedList());
           f = tl.getFirst();
+          find = false;
           while (f) {
-            if (f.elm.name === name) f.elm.tween = tween;
+            if (f.elm.name === name) {
+              find = true;
+              f.elm.tween = tween;
+              break;
+            }
             f = f.next;
           }
-        } else if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY") {
+          if (!find) {
+            tl.push({
+              name: name,
+              tween: tween
+            });
+          }
+        } else if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "margin" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY") {
           this._css2W.pushProperty(name);
-          tl = this._styleTweens || (this._styleTweens = new LinkedList());
+          tl = this._tweens || (this._tweens = new LinkedList());
           fp = 0;
           if (from && !isNaN(from[name])) {
             fp = from[name];
@@ -1165,15 +1124,15 @@
           }
         } else if (name === "grayscale" || name === "sepia" || name === "saturate" || name === "hueRotate" || name === "invert" || name === "brightness" || name === "contrast" || name === "blur") {
           this._flWrapper.pushProperty(name);
-          tl = this._filterTweens || (this._filterTweens = new LinkedList());
           fp = 0;
           if (from && !isNaN(from[name])) {
             fp = from[name];
           } else {
             fp = !isNaN(this[name]) ? this[name] : PropertyMapper._defaults[name];
           }
-          c[name] = to[name] - fp;
           from[name] = fp;
+          c[name] = to[name] - fp;
+          tl = this._tweens || (this._tweens = new LinkedList());
           f = tl.getFirst();
           find = false;
           while (f) {
@@ -1210,7 +1169,7 @@
       for (name in properties) {
         if (this[name] !== null) {
           change = true;
-          if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY" || name === "visible" || name === "display") {
+          if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "margin" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY" || name === "visible" || name === "display") {
             this._css2W.pushProperty(name);
           } else if (name === "x" || name === "y" || name === "z" || name === "rotation" || name === "rotationX" || name === "rotationY" || name === "rotationZ" || name === "skewX" || name === "skewY" || name === "scaleX" || name === "scaleY") {
             this._trWrapper.pushProperty(name);
@@ -1224,32 +1183,8 @@
     };
 
     PropertyMapper.prototype.update = function(ct) {
-      var f, tw;
-      f = this._trTweens ? this._trTweens.getFirst() : null;
-      while (f) {
-        tw = f.elm.tween;
-        if (!tw) {
-          f = f.next;
-          continue;
-        }
-        if (tw._state === TweenState.Completed || tw._state === TweenState.Playing) {
-          tw.update(ct, f.elm.name);
-        }
-        f = f.next;
-      }
-      f = this._styleTweens ? this._styleTweens.getFirst() : null;
-      while (f) {
-        tw = f.elm.tween;
-        if (!tw) {
-          f = f.next;
-          continue;
-        }
-        if (tw._state === TweenState.Completed || tw._state === TweenState.Playing) {
-          tw.update(ct, f.elm.name);
-        }
-        f = f.next;
-      }
-      f = this._filterTweens ? this._filterTweens.getFirst() : null;
+      var f, mcount, tw;
+      f = this._tweens ? this._tweens.getFirst() : null;
       while (f) {
         tw = f.elm.tween;
         if (!tw) {
@@ -1262,57 +1197,8 @@
         f = f.next;
       }
       this.applyStyles();
-      this.fixTweens();
-    };
-
-    PropertyMapper.prototype.fixTweens = function() {
-      var f, mcount, tw;
-      f = this._trTweens ? this._trTweens.getFirst() : null;
+      f = this._tweens ? this._tweens.getFirst() : null;
       mcount = 0;
-      while (f) {
-        tw = f.elm.tween;
-        if (!tw) {
-          f = f.next;
-          continue;
-        }
-        if (tw._state === TweenState.Completed) {
-          tw.tickUpdate();
-          f.elm.tween = null;
-          tw.finalize();
-          mcount = 1;
-        } else if (tw._state === TweenState.Playing) {
-          tw.tickUpdate();
-          mcount = 1;
-        } else if (tw._state === TweenState.Stoped) {
-          f.elm.tween = null;
-        } else if (tw._state === TweenState.Initialized) {
-          mcount = 1;
-        }
-        f = f.next;
-      }
-      f = this._styleTweens ? this._styleTweens.getFirst() : null;
-      while (f) {
-        tw = f.elm.tween;
-        if (!tw) {
-          f = f.next;
-          continue;
-        }
-        if (tw._state === TweenState.Completed) {
-          tw.tickUpdate();
-          f.elm.tween = null;
-          tw.finalize();
-          mcount = 1;
-        } else if (tw._state === TweenState.Playing) {
-          tw.tickUpdate();
-          mcount = 1;
-        } else if (tw._state === TweenState.Stoped) {
-          f.elm.tween = null;
-        } else if (tw._state === TweenState.Initialized) {
-          mcount = 1;
-        }
-        f = f.next;
-      }
-      f = this._filterTweens ? this._filterTweens.getFirst() : null;
       while (f) {
         tw = f.elm.tween;
         if (!tw) {
@@ -1584,6 +1470,13 @@
 
     BasicTween.prototype.tickUpdate = function() {
       if (this._onUpdate) this._onUpdate(this);
+    };
+
+    BasicTween.prototype.tickOverwrite = function() {
+      if (this._state === TweenState.Completed || this._state === TweenState.Finalized) {
+        return;
+      }
+      if (this._onOverwrited) return this._onOverwrited(this);
     };
 
     BasicTween.prototype.stop = function() {

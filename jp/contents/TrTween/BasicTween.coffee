@@ -4,6 +4,7 @@ class BasicTween extends ITween
 		@_onPlay     = null
 		@_onUpdate   = null
 		@_onStop     = null
+		
 		@_state      = TweenState.Initialized
 		@_from       = from || {}
 		@_to         = to
@@ -35,7 +36,6 @@ class BasicTween extends ITween
 		if @_onUpdate
 			@_onUpdate(@)
 		return
-
 	stop:->
 		@_state = TweenState.Stoped
 		if @_onStop

@@ -62,6 +62,7 @@ TweenState = {
 	Playing:1,
 	Completed:2,
 	Stoped:3,
-	Finalized:4
+	Finalized:4,
+	Overwrited:5
 }
 

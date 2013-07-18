@@ -253,8 +253,8 @@ class FSW
 		m = @_mapper
 		p = @_pl
 		for val,i in @_hasProperties
-			if val is null
-				continue
+			# if val is null
+			# 	continue
 			obj = p[val]
 			v = ((m[val] * 1000) | 0) * .001
 			trstr += obj.prefix + v+ obj.sufix
@@ -286,6 +286,10 @@ class CSS2W
 			prefix:"height:",
 			sufix:"px;"
 		},
+		margin:{
+			prefix:"margin:",
+			sufix:"px;"
+		}
 		marginTop:{
 			prefix:"margin-top:",
 			sufix:"px;"
@@ -418,8 +422,8 @@ class CSS2W
 		m = @_mapper
 		p = @_pl
 		for val,i in @_hasProperties
-			if val is null
-				continue
+			# if val is null
+			# 	continue
 			obj = p[val]
 			if val is "backgroundPosition"
 				vx = ((m.backgroundPositionX * 1000) | 0) * .001
