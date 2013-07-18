@@ -8,28 +8,26 @@ class EasingTween extends ITweenGroup
 			@_onChildComplete()
 		@_index = 0
 		@_max = @_tweens.length-1
+		@_timers = []
 		return
 	play:->
-		for val in @_tweens
-			val._state = TweenState.Initialized
-			val.onComplete(@_delegate)
-		Render.addListener(@)
-		@_st = if Date.now? then Date.now() else new Date().getTime()
-		@_endTime = @_st + @_duration
+		len = @_max
+		d = @_duration
+		easing = @_easing
+		for val,i in @_tweens
+			time = d * i/len
+			delay = d - easing.update(d - time,0,d,d)
+			@_timers[i] = @_playChild(val,delay)
 		@_state = TweenState.Playing
-		if Render.getState() is 0
-			Render.start()
+		
 		return
-	update:(ct)->
-		si = @_easing.update(ct - @_st,0,@_max,@_duration)
-		if @_endTime <= ct
-			si = @_easing.update(@_duration,0,@_max,@_duration)
-			Render.removeListener(@)
-		for i in [0..si]
-			tw = @_tweens[i]
-			if tw._state is TweenState.Initialized
-				tw.play()
-		return
+	_playChild:(tween,delay)->
+		tween._state = TweenState.Initialized
+		tween.onComplete(@_delegate)
+		return setTimeout(->
+			tween.play()
+		,delay)
+		
 	_onChildComplete:->
 		for val in @_tweens
 			if val._state is TweenState.Playing or val._state is TweenState.Initialized then return
@@ -41,8 +39,9 @@ class EasingTween extends ITweenGroup
 			@_onComplete(@)
 		return
 	stop:->
-		for val in @_tweens
+		for val,i in @_tweens
 			val.stop()
+			clearTimeout(@_timers[i])
 		@_state = TweenState.Finalized
 		if @_onComplete
 			@_onComplete(@)

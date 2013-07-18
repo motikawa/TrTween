@@ -1912,35 +1912,31 @@
       };
       this._index = 0;
       this._max = this._tweens.length - 1;
+      this._timers = [];
       return;
     }
 
     EasingTween.prototype.play = function() {
-      var val, _i, _len, _ref;
+      var d, delay, easing, i, len, time, val, _len, _ref;
+      len = this._max;
+      d = this._duration;
+      easing = this._easing;
       _ref = this._tweens;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        val = _ref[_i];
-        val._state = TweenState.Initialized;
-        val.onComplete(this._delegate);
+      for (i = 0, _len = _ref.length; i < _len; i++) {
+        val = _ref[i];
+        time = d * i / len;
+        delay = d - easing.update(d - time, 0, d, d);
+        this._timers[i] = this._playChild(val, delay);
       }
-      Render.addListener(this);
-      this._st = Date.now != null ? Date.now() : new Date().getTime();
-      this._endTime = this._st + this._duration;
       this._state = TweenState.Playing;
-      if (Render.getState() === 0) Render.start();
     };
 
-    EasingTween.prototype.update = function(ct) {
-      var i, si, tw;
-      si = this._easing.update(ct - this._st, 0, this._max, this._duration);
-      if (this._endTime <= ct) {
-        si = this._easing.update(this._duration, 0, this._max, this._duration);
-        Render.removeListener(this);
-      }
-      for (i = 0; 0 <= si ? i <= si : i >= si; 0 <= si ? i++ : i--) {
-        tw = this._tweens[i];
-        if (tw._state === TweenState.Initialized) tw.play();
-      }
+    EasingTween.prototype._playChild = function(tween, delay) {
+      tween._state = TweenState.Initialized;
+      tween.onComplete(this._delegate);
+      return setTimeout(function() {
+        return tween.play();
+      }, delay);
     };
 
     EasingTween.prototype._onChildComplete = function() {
@@ -1961,11 +1957,12 @@
     };
 
     EasingTween.prototype.stop = function() {
-      var val, _i, _len, _ref;
+      var i, val, _len, _ref;
       _ref = this._tweens;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        val = _ref[_i];
+      for (i = 0, _len = _ref.length; i < _len; i++) {
+        val = _ref[i];
         val.stop();
+        clearTimeout(this._timers[i]);
       }
       this._state = TweenState.Finalized;
       if (this._onComplete) this._onComplete(this);

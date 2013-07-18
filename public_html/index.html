@@ -6,15 +6,15 @@
 			.test{
 				width: 20px;height: 20px;
 				float: left;
-				margin:.5px;
+				/*margin:.5px;*/
 				border: 1px #f00 solid;
 				background: #fff;
 				overflow: hidden;
 				color:#000;
 				text-align: center;
 				line-height: 20px;
-				font-size: 2px;
-				position: relative;
+				font-size: 10px;
+				/*position: relative;*/
 			}
 			#box{
 				width:100%;height:100%;
@@ -38,35 +38,35 @@
 
 			$(document).ready(function(){
 				var arr = [];
-				for (var i= 0,len = 100;i < len;i++)
-				{
-					var div  = $("<div class='test t"+ (i + 1).toString() + "'></div>")
-					$("#box").append(div);
-					arr.push(TrTween.tween(div[0],{y:100,left:100},null,1,Quart.easeOut));
-				}
-				TrTween.serial(
-					TrTween.tween($("#box .test")[0],{y:200,scaleX:2,scaleY:2},null,.5,Quart.easeIn),
-					TrTween.transition($("#box .test")[4],{rotation:180},{rotation:0},1,"easeOutSine"),
-					TrTween.parallel(
-						TrTween.bezier($("#box .test")[3],{x:300,y:200},null,{x:150,y:400},1,Bounce.easeOut),
-						TrTween.delay(TrTween.tween($("#box .test")[6],{blur:10},null,1,Sine.easeOut),1),
-						TrTween.delay(TrTween.animation($("#box .test")[10],{rotationY:150},{rotationY:0},1,"easeOutExpo"),2)
-					),
-					TrTween.easingTweens(arr,Expo.easeInOut,2)
-				).play()
 				// for (var i= 0,len = 100;i < len;i++)
 				// {
-				// 	var div  = $("<div class='test t"+ (i + 1).toString() + "'>"+i.toString() +"</div>")
+				// 	var div  = $("<div class='test t"+ (i + 1).toString() + "'></div>")
 				// 	$("#box").append(div);
-				// 	TrTween.prop(div[0],{alpha:0}).play();
-				// 	arr.push(
-				// 		TrTween.serial(
-				// 			// TrTween.prop(div[0],{visible:true,display:"block"}),
-				// 			TrTween.tween(div[0],{alpha:.01 * i,y:100 + i,brightness:i,rotationX:360},null,1,Quart.easeInOut)
-				// 		)
-				// 	);
+				// 	arr.push(TrTween.tween(div[0],{y:100,left:100},null,1,Quart.easeOut));
 				// }
-				// TrTween.easingTweens(arr,Expo.easeIn,1).play()
+				// TrTween.serial(
+				// 	TrTween.tween($("#box .test")[0],{y:200,scaleX:2,scaleY:2},null,.5,Quart.easeIn),
+				// 	TrTween.transition($("#box .test")[4],{rotation:180},{rotation:0},1,"easeOutSine"),
+				// 	TrTween.parallel(
+				// 		TrTween.bezier($("#box .test")[3],{x:300,y:200},null,{x:150,y:400},1,Bounce.easeOut),
+				// 		TrTween.delay(TrTween.tween($("#box .test")[6],{blur:10},null,1,Sine.easeOut),1),
+				// 		TrTween.delay(TrTween.animation($("#box .test")[10],{rotationY:150},{rotationY:0},1,"easeOutExpo"),2)
+				// 	),
+				// 	TrTween.easingTweens(arr,Expo.easeInOut,2)
+				// ).play()
+				for (var i= 0,len = 300;i < len;i++)
+				{
+					var div  = $("<div class='test t"+ (i + 1).toString() + "'>"+i.toString() +"</div>")
+					$("#box").append(div);
+					// TrTween.prop(div[0],{alpha:0}).play();
+					arr.push(
+						TrTween.serial(
+							// TrTween.prop(div[0],{visible:true,display:"block"}),
+							TrTween.transition(div[0],{y:i},null,1,"easeOutQuart")
+						)
+					);
+				}
+				TrTween.easingTweens(arr,Quart.easeOutIn,1).play()
 				
 				
 		});
