@@ -25,6 +25,7 @@ project_files = [
 		"TrTweenCore.coffee",
 		"LinkedList.coffee",
 		"Render.coffee",
+		"DOMWrappers.coffee"
 		"PropertyMapper.coffee",
 		"ITween.coffee",
 		"BasicTween.coffee",

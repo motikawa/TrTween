@@ -44,7 +44,6 @@ class AnimationTween extends ICSSTween
 		@_state = TweenState.Initialized
 		@_animationName = VenderInfo.vender+"Animation"
 		@_animationEnd  = VenderInfo.animationEnd
-		console.log(@_animationEnd)
 		@_animationNameCSS = VenderInfo.cssVender + "animation"
 		@_delegate = =>
 			@_onAnimationEnd()

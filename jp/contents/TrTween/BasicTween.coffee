@@ -25,7 +25,7 @@ class BasicTween extends ITween
 		return
 	update:(ct,prop)->
 		if ct >= @_endTime 
-			@_mapper[prop] = (@_easing.update(@_duration,@_from[prop],@_c[prop],@_duration) * 1000 | 0) / 1000
+			@_mapper[prop] = @_easing.update(@_duration,@_from[prop],@_c[prop],@_duration)
 			@_state = TweenState.Completed
 			return
 		@_mapper[prop] = @_easing.update(ct - @_st,@_from[prop],@_c[prop],@_duration)

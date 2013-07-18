@@ -2,18 +2,24 @@
 	<head>
 		<meta charset="UTF-8">
 		<style>
-			body {background: #000;}
+			body {background: #fff;}
 			.test{
-				width: 50px;height: 50px;
+				width: 20px;height: 20px;
 				float: left;
-				margin-left: 1px;
+				margin:.5px;
+				border: 1px #f00 solid;
 				background: #fff;
 				overflow: hidden;
+				color:#000;
+				text-align: center;
+				line-height: 20px;
+				font-size: 2px;
+				position: relative;
 			}
 			#box{
 				width:100%;height:100%;
 				position: absolute;
-				top:100px;
+				top:0px;
 			}
 			#cvs{
 				background: transparent;
@@ -32,11 +38,11 @@
 
 			$(document).ready(function(){
 				var arr = [];
-				for (var i= 0,len = 12;i < len;i++)
+				for (var i= 0,len = 100;i < len;i++)
 				{
 					var div  = $("<div class='test t"+ (i + 1).toString() + "'></div>")
 					$("#box").append(div);
-					arr.push(TrTween.tween(div[0],{x:100,y:100},null,1,Quart.easeOut));
+					arr.push(TrTween.tween(div[0],{y:100,left:100},null,1,Quart.easeOut));
 				}
 				TrTween.serial(
 					TrTween.tween($("#box .test")[0],{y:200,scaleX:2,scaleY:2},null,.5,Quart.easeIn),
@@ -48,6 +54,20 @@
 					),
 					TrTween.easingTweens(arr,Expo.easeInOut,2)
 				).play()
+				// for (var i= 0,len = 100;i < len;i++)
+				// {
+				// 	var div  = $("<div class='test t"+ (i + 1).toString() + "'>"+i.toString() +"</div>")
+				// 	$("#box").append(div);
+				// 	TrTween.prop(div[0],{alpha:0}).play();
+				// 	arr.push(
+				// 		TrTween.serial(
+				// 			// TrTween.prop(div[0],{visible:true,display:"block"}),
+				// 			TrTween.tween(div[0],{alpha:.01 * i,y:100 + i,brightness:i,rotationX:360},null,1,Quart.easeInOut)
+				// 		)
+				// 	);
+				// }
+				// TrTween.easingTweens(arr,Expo.easeIn,1).play()
+				
 				
 		});
 			

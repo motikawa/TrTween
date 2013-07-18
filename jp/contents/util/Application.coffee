@@ -15,6 +15,12 @@ OSName = {
 	Android:"android"
 }
 window.console =  if window.console? then window.console else {log:()->}
+if !Array.prototype.indexOf?
+	Array.prototype.indexOf = (elm)->
+		for val,i in @
+			if val is elm
+				return i
+		return -1
 class Application
 	@_init:->
 		ua = navigator.userAgent.toUpperCase()

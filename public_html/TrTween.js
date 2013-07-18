@@ -2,7 +2,7 @@
 
   'use strict';
 
-  var APP_BROWSER, APP_OS, AnimationTween, Application, BasicTween, BezierTween, BrowserName, CSS3Easing, DelayTween, Delegate, EasingTween, FuncTween, ICSSTween, ITween, ITweenGroup, Linear, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Render, RepeatTween, SerialTween, TrTween, TransitionTween, TweenState, VenderInfo, cancelAnimationFrame, isFIE, isIOS, requestAnimationFrame;
+  var APP_BROWSER, APP_OS, AnimationTween, Application, BasicTween, BezierTween, BrowserName, CSS2W, CSS3Easing, DelayTween, Delegate, EasingTween, FSW, FuncTween, ICSSTween, ITween, ITweenGroup, Linear, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Render, RepeatTween, SerialTween, TSW, TrTween, TransitionTween, TweenState, VenderInfo, cancelAnimationFrame, isFIE, isIOS, requestAnimationFrame;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   BrowserName = {
@@ -25,6 +25,17 @@
   window.console = window.console != null ? window.console : {
     log: function() {}
   };
+
+  if (!(Array.prototype.indexOf != null)) {
+    Array.prototype.indexOf = function(elm) {
+      var i, val, _len;
+      for (i = 0, _len = this.length; i < _len; i++) {
+        val = this[i];
+        if (val === elm) return i;
+      }
+      return -1;
+    };
+  }
 
   Application = (function() {
 
@@ -343,6 +354,8 @@
 
     Render._updaters = new LinkedList();
 
+    Render.tick = null;
+
     Render.removeListener = function(updater) {
       Render._updaters.slice(updater);
     };
@@ -367,6 +380,13 @@
     Render._rid = -1;
 
     Render.start = function() {
+      if (!(Render.tick != null)) {
+        if (Date.now != null) {
+          Render.tick = Render._tick;
+        } else {
+          Render.tick = Render._tickOld;
+        }
+      }
       Render._state = 1;
       Render.tick();
     };
@@ -375,10 +395,23 @@
       cancelAnimationFrame(Render._rid);
     };
 
-    Render.tick = function() {
+    Render._tick = function() {
       var ct, f, mt, updaters;
       mt = 0;
-      ct = Date.now != null ? Date.now() : new Date().getTime();
+      ct = Date.now();
+      updaters = Render._updaters;
+      f = updaters.getFirst();
+      while (f) {
+        f.elm.update(ct);
+        f = f.next;
+      }
+      Render._rid = requestAnimationFrame(Render.tick);
+    };
+
+    Render._tickOld = function() {
+      var ct, f, mt, updaters;
+      mt = 0;
+      ct = new Date().getTime();
       updaters = Render._updaters;
       f = updaters.getFirst();
       while (f) {
@@ -391,6 +424,490 @@
     return Render;
 
   })();
+
+  TSW = (function() {
+
+    TSW._propList = {
+      "x": {
+        prefix: "translateX(",
+        sufix: "px) ",
+        index: 0
+      },
+      "y": {
+        prefix: "translateY(",
+        sufix: "px) ",
+        index: 1
+      },
+      "z": {
+        prefix: "translateZ(",
+        sufix: "px) ",
+        index: 2
+      },
+      "rotation": {
+        prefix: "rotate(",
+        sufix: "deg) ",
+        index: 3
+      },
+      "rotationX": {
+        prefix: "rotateX(",
+        sufix: "deg) ",
+        index: 4
+      },
+      "rotationY": {
+        prefix: "rotateY(",
+        sufix: "deg) ",
+        index: 5
+      },
+      "rotationZ": {
+        prefix: "rotateZ(",
+        sufix: "deg) ",
+        index: 6
+      },
+      "skewX": {
+        prefix: "skewX(",
+        sufix: "deg) ",
+        index: 7
+      },
+      "skewY": {
+        prefix: "skewY(",
+        sufix: "deg) ",
+        index: 8
+      },
+      "scaleX": {
+        prefix: "scaleX(",
+        sufix: ") ",
+        index: 9
+      },
+      "scaleY": {
+        prefix: "scaleY(",
+        sufix: ") ",
+        index: 10
+      }
+    };
+
+    TSW._properties = ["x", "y", "z", "rotation", "rotationX", "rotationY", "rotationZ", "skewX", "skewY", "scaleX", "scaleY"];
+
+    TSW._defaults = {
+      x: 0,
+      y: 0,
+      z: 0,
+      rotation: 0,
+      rotationX: 0,
+      rotationY: 0,
+      rotationZ: 0,
+      scaleX: 1,
+      scaleY: 1,
+      skewX: 0,
+      skewY: 0
+    };
+
+    TSW._styleName = VenderInfo.cssVender + "transform";
+
+    TSW.prototype._parsePropaties = function() {
+      var m, owner, r, targetTransform;
+      owner = this;
+      m = owner._mapper;
+      targetTransform = m._target.style[this._sname];
+      if (isFIE || targetTransform === void 0) return;
+      r = /(translateX\()([0-9||\.||-||e-]+)(px\))/;
+      if (targetTransform.match(r)) {
+        m.x = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("x");
+      } else {
+        m.x = NaN;
+      }
+      r = /(translateY\()([0-9||\.||-||e-]+)(px\))/;
+      if (targetTransform.match(r)) {
+        m.y = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("y");
+      } else {
+        m.y = NaN;
+      }
+      r = /(translateZ\()([0-9||\.||-||e-]+)(px\))/;
+      if (targetTransform.match(r)) {
+        m.z = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("z");
+      } else {
+        m.z = NaN;
+      }
+      r = /(rotate\()([0-9||\.||-||e-]+)(deg\))/;
+      if (targetTransform.match(r)) {
+        m.rotation = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("rotation");
+      } else {
+        m.rotation = NaN;
+      }
+      r = /(rotateX\()([0-9||\.||-||e-]+)(deg\))/;
+      if (targetTransform.match(r)) {
+        m.rotationX = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("rotationX");
+      } else {
+        m.rotationX = NaN;
+      }
+      r = /(rotateY\()([0-9||\.||-||e-]+)(deg\))/;
+      if (targetTransform.match(r)) {
+        m.rotationY = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("rotationY");
+      } else {
+        m.rotationY = NaN;
+      }
+      r = /(rotateZ\()([0-9||\.||-||e-]+)(deg\))/;
+      if (targetTransform.match(r)) {
+        m.rotationZ = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("rotationZ");
+      } else {
+        m.rotationZ = NaN;
+      }
+      r = /(skewX\()([0-9||\.||-||e-]+)(deg\))/;
+      if (targetTransform.match(r)) {
+        m.skewX = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("skewX");
+      } else {
+        m.skewX = NaN;
+      }
+      r = /(skewY\()([0-9||\.||-||e-]+)(deg\))/;
+      if (targetTransform.match(r)) {
+        m.skewY = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("skewY");
+      } else {
+        m.skewY = NaN;
+      }
+      r = /(scaleX\()([0-9||\.||-||e-]+)(\))/;
+      if (targetTransform.match(r)) {
+        m.scaleX = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("scaleX");
+      } else {
+        m.scaleX = NaN;
+      }
+      r = /(scaleY\()([0-9||\.||-||e-]+)(\))/;
+      if (targetTransform.match(r)) {
+        m.scaleY = targetTransform.match(r)[2] * 1;
+        owner.pushProperty("scaleY");
+      } else {
+        m.scaleY = NaN;
+      }
+    };
+
+    function TSW(mapper) {
+      this._mapper = mapper;
+      this._sname = TSW._styleName;
+      this._props = TSW._propList;
+      this._hasProperties = [null, null, null, null, null, null, null, null, null, null, null];
+      this.toStyleString = function() {
+        return "";
+      };
+      this._parsePropaties();
+      return;
+    }
+
+    TSW.prototype.pushProperty = function(propname) {
+      var index;
+      index = TSW._propList[propname].index;
+      this._hasProperties[index] = propname;
+      this.toStyleString = this._toStyleString;
+    };
+
+    TSW.prototype._toStyleString = function() {
+      var i, m, obj, p, trstr, v, val, _len, _ref;
+      trstr = this._sname + ": ";
+      m = this._mapper;
+      p = this._props;
+      _ref = this._hasProperties;
+      for (i = 0, _len = _ref.length; i < _len; i++) {
+        val = _ref[i];
+        if (val === null) continue;
+        obj = p[val];
+        v = ((m[val] * 1000) | 0) * .001;
+        trstr += obj.prefix + v + obj.sufix;
+      }
+      return trstr + ";";
+    };
+
+    return TSW;
+
+  })();
+
+  FSW = (function() {
+
+    FSW._propList = {
+      "grayscale": {
+        prefix: "grayscale(",
+        sufix: "%) "
+      },
+      "sepia": {
+        prefix: "sepia(",
+        sufix: "%) "
+      },
+      "saturate": {
+        prefix: "saturate(",
+        sufix: "%) "
+      },
+      "hueRotate": {
+        prefix: "hue-rotate(",
+        sufix: "deg) "
+      },
+      "invert": {
+        prefix: "invert(",
+        sufix: "%) "
+      },
+      "brightness": {
+        prefix: "brightness(",
+        sufix: "%) "
+      },
+      "contrast": {
+        prefix: "contrast(",
+        sufix: "%) "
+      },
+      "blur": {
+        prefix: "blur(",
+        sufix: "px) "
+      }
+    };
+
+    FSW._styleName = VenderInfo.cssVender + "filter";
+
+    function FSW(mapper) {
+      this._mapper = mapper;
+      this._sname = FSW._styleName;
+      this._pl = FSW._propList;
+      this._hasProperties = [];
+      this.toStyleString = function() {
+        return "";
+      };
+      return;
+    }
+
+    FSW.prototype.pushProperty = function(propname) {
+      if (this._hasProperties.indexOf(propname) > -1) return;
+      this._hasProperties[this._hasProperties.length] = propname;
+      this.toStyleString = this._toStyleString;
+    };
+
+    FSW.prototype._toStyleString = function() {
+      var i, m, obj, p, trstr, v, val, _len, _ref;
+      trstr = this._sname + ": ";
+      m = this._mapper;
+      p = this._pl;
+      _ref = this._hasProperties;
+      for (i = 0, _len = _ref.length; i < _len; i++) {
+        val = _ref[i];
+        if (val === null) continue;
+        obj = p[val];
+        v = ((m[val] * 1000) | 0) * .001;
+        trstr += obj.prefix + v + obj.sufix;
+      }
+      return trstr + ";";
+    };
+
+    return FSW;
+
+  })();
+
+  CSS2W = (function() {
+
+    CSS2W._propList = {
+      top: {
+        prefix: "top:",
+        sufix: "px;"
+      },
+      bottom: {
+        prefix: "bottom:",
+        sufix: "px;"
+      },
+      left: {
+        prefix: "left:",
+        sufix: "px;"
+      },
+      right: {
+        prefix: "right:",
+        sufix: "px;"
+      },
+      width: {
+        prefix: "width:",
+        sufix: "px;"
+      },
+      height: {
+        prefix: "height:",
+        sufix: "px;"
+      },
+      marginTop: {
+        prefix: "margin-top:",
+        sufix: "px;"
+      },
+      marginBottom: {
+        prefix: "margin-bottom:",
+        sufix: "px;"
+      },
+      marginLeft: {
+        prefix: "margin-left:",
+        sufix: "px;"
+      },
+      marginRight: {
+        prefix: "margin-right:",
+        sufix: "px;"
+      },
+      alpha: {
+        prefix: "opacity:",
+        sufix: ";"
+      },
+      backgroundPosition: {
+        prefix: "background-position:",
+        sufix: ";"
+      },
+      visible: {
+        prefix: "visibility:",
+        sufix: ";"
+      },
+      display: {
+        prefix: "display:",
+        sufix: ";"
+      }
+    };
+
+    CSS2W.init = function() {
+      var bn, ver;
+      bn = APP_BROWSER.name;
+      ver = APP_BROWSER.version;
+      if (bn !== "ie") {
+        return;
+      } else if (bn === "ie" && ver > 8) {
+        return;
+      }
+      if (ver >= 8) {
+        return CSS2W._propList.alpha = {
+          prefix: "zoom:1;-ms-filter:\"alpha(opacity=",
+          sufix: ")\";"
+        };
+      } else {
+        return CSS2W._propList.alpha = {
+          prefix: "zoom:1;filter:alpha(opacity=",
+          sufix: ");"
+        };
+      }
+    };
+
+    CSS2W.prototype._parsePropaties = function() {
+      var arr, m, owner, px, py, target;
+      owner = this;
+      m = owner._mapper;
+      target = m._target;
+      if (target.style) {
+        if (!isNaN(parseFloat(target.style.opacity))) {
+          m.alpha = parseFloat(target.style.opacity);
+          owner.pushProperty("alpha");
+        }
+        if (!isNaN(parseFloat(target.style.top))) {
+          m.top = parseFloat(target.style.top);
+          owner.pushProperty("top");
+        }
+        if (!isNaN(parseFloat(target.style.bottom))) {
+          m.bottom = parseFloat(target.style.bottom);
+          owner.pushProperty("bottom");
+        }
+        if (!isNaN(parseFloat(target.style.left))) {
+          m.left = parseFloat(target.style.left);
+          owner.pushProperty("left");
+        }
+        if (!isNaN(parseFloat(target.style.right))) {
+          m.right = parseFloat(target.style.right);
+          owner.pushProperty("right");
+        }
+        if (!isNaN(parseFloat(target.style.width))) {
+          m.width = parseFloat(target.style.width);
+          owner.pushProperty("width");
+        }
+        if (!isNaN(parseFloat(target.style.height))) {
+          m.height = parseFloat(target.style.height);
+          owner.pushProperty("height");
+        }
+        if (!isNaN(parseFloat(target.style.marginTop))) {
+          m.marginTop = parseFloat(target.style.marginTop);
+          owner.pushProperty("marginTop");
+        }
+        if (!isNaN(parseFloat(target.style.marginBottom))) {
+          m.marginBottom = parseFloat(target.style.marginBottom);
+          owner.pushProperty("marginBottom");
+        }
+        if (!isNaN(parseFloat(target.style.marginRight))) {
+          m.marignRight = parseFloat(target.style.marginRight);
+          owner.pushProperty("marignRight");
+        }
+        if (!isNaN(parseFloat(target.style.marginLeft))) {
+          m.marginLeft = parseFloat(target.style.marginLeft);
+          owner.pushProperty("marignLeft");
+        }
+        if (target.style.backgroundPosition !== "") {
+          m.backgroundPositionY = 0;
+          m.backgroundPositionX = 0;
+          arr = target.style.backgroundPosition.split(" ");
+          px = parseFloat(arr[0]);
+          py = parseFloat(arr[1]);
+          if (!isNaN(px)) m.backgroundPositionX = px;
+          if (!isNaN(px)) m.backgroundPositionY = py;
+          owner.pushProperty("backgroundPosition");
+        }
+      }
+    };
+
+    function CSS2W(mapper) {
+      this._mapper = mapper;
+      this._hasProperties = [];
+      this._pl = CSS2W._propList;
+      this.toStyleString = function() {
+        return "";
+      };
+      this._parsePropaties();
+      return;
+    }
+
+    CSS2W.prototype.pushProperty = function(propname) {
+      if (propname === "backgroundPositionY" || propname === "backgroundPositionX" || propname === "backgroundPosition") {
+        if (isNaN(this._mapper.backgroundPositionX)) {
+          this._mapper.backgroundPositionX = 0;
+        }
+        if (isNaN(this._mapper.backgroundPositionY)) {
+          this._mapper.backgroundPositionY = 0;
+        }
+        propname = "backgroundPosition";
+      }
+      if (this._hasProperties.indexOf(propname) > -1) return;
+      this._hasProperties[this._hasProperties.length] = propname;
+      this.toStyleString = this._toStyleString;
+    };
+
+    CSS2W.prototype._toStyleString = function() {
+      var i, m, obj, p, trstr, v, val, vx, vy, _len, _ref;
+      trstr = "";
+      m = this._mapper;
+      p = this._pl;
+      _ref = this._hasProperties;
+      for (i = 0, _len = _ref.length; i < _len; i++) {
+        val = _ref[i];
+        if (val === null) continue;
+        obj = p[val];
+        if (val === "backgroundPosition") {
+          vx = ((m.backgroundPositionX * 1000) | 0) * .001;
+          vy = ((m.backgroundPositionY * 1000) | 0) * .001;
+          trstr += obj.prefix + vx + " " + vy + obj.sufix;
+        } else if (val === "visible") {
+          v = m.visible ? "visible" : "hidden";
+          trstr += obj.prefix + v + obj.sufix;
+        } else if (val === "display") {
+          v = m[val];
+          trstr += obj.prefix + v + obj.sufix;
+        } else {
+          v = ((m[val] * 1000) | 0) * .001;
+          trstr += obj.prefix + v + obj.sufix;
+        }
+      }
+      return trstr + ";";
+    };
+
+    return CSS2W;
+
+  })();
+
+  CSS2W.init();
 
   PropertyMapper = (function() {
 
@@ -495,11 +1012,16 @@
       this._needUpdate = false;
       this._transformVals = [];
       this.transitionStr = "";
-      this._parsePropaties();
-      this._hasTransform = false;
-      this._hasCss2Style = false;
-      this._hasFilter = false;
-      if (isIOS) this._target.style.webkitTransformStyle = "preserve-3d";
+      this._trWrapper = new TSW(this);
+      this._flWrapper = new FSW(this);
+      this._css2W = new CSS2W(this);
+      if (isFIE) {
+        this.registerTween = this._registerTweenForFIE;
+        this.applyStyles = this._applyStylesForFIE;
+      } else {
+        this.registerTween = this._registerTween;
+        this.applyStyles = this._applyStyles;
+      }
       return;
     }
 
@@ -552,133 +1074,54 @@
       return this._trTweens;
     };
 
-    PropertyMapper.prototype._parsePropaties = function() {
-      var arr, px, py, r, target, targetTransform;
-      target = this._target;
-      if (!isFIE && target.style[this._trName] !== void 0) {
-        targetTransform = target.style[this._trName];
-        r = /(translateX\()([0-9||\.||-||e-]+)(px\))/;
-        this.x = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(translateY\()([0-9||\.||-||e-]+)(px\))/;
-        this.y = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(translateZ\()([0-9||\.||-||e-]+)(px\))/;
-        this.z = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(scaleX\()([0-9||\.||-||e-]+)(\))/;
-        this.scaleX = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(scaleY\()([0-9||\.||-||e-]+)(\))/;
-        this.scaleY = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(rotate\()([0-9||\.||-||e-]+)(deg\))/;
-        this.rotation = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(rotateX\()([0-9||\.||-||e-]+)(deg\))/;
-        this.rotationX = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(rotateY\()([0-9||\.||-||e-]+)(deg\))/;
-        this.rotationY = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(rotateZ\()([0-9||\.||-||e-]+)(deg\))/;
-        this.rotationZ = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(skewX\()([0-9||\.||-||e-]+)(deg\))/;
-        this.skewX = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-        r = /(skewY\()([0-9||\.||-||e-]+)(deg\))/;
-        this.skewY = targetTransform.match(r) ? targetTransform.match(r)[2] * 1 : NaN;
-      }
-      if (target.style) {
-        if (!isNaN(parseFloat(target.style.opacity))) {
-          this.alpha = parseFloat(target.style.opacity);
-        }
-        if (!isNaN(parseFloat(target.style.top))) {
-          this.top = parseFloat(target.style.top);
-        }
-        if (!isNaN(parseFloat(target.style.bottom))) {
-          this.bottom = parseFloat(target.style.bottom);
-        }
-        if (!isNaN(parseFloat(target.style.left))) {
-          this.left = parseFloat(target.style.left);
-        }
-        if (!isNaN(parseFloat(target.style.right))) {
-          this.right = parseFloat(target.style.right);
-        }
-        if (!isNaN(parseFloat(target.style.width))) {
-          this.width = parseFloat(target.style.width);
-        }
-        if (!isNaN(parseFloat(target.style.height))) {
-          this.height = parseFloat(target.style.height);
-        }
-        if (!isNaN(parseFloat(target.style.marginTop))) {
-          this.marginTop = parseFloat(target.style.marginTop);
-        }
-        if (!isNaN(parseFloat(target.style.marginBottom))) {
-          this.marginBottom = parseFloat(target.style.marginBottom);
-        }
-        if (!isNaN(parseFloat(target.style.marginRight))) {
-          this.marignRight = parseFloat(target.style.marginRight);
-        }
-        if (!isNaN(parseFloat(target.style.marginLeft))) {
-          this.marginLeft = parseFloat(target.style.marginLeft);
-        }
-        if (target.style.backgroundPosition !== "") {
-          this.backgroundPositionY = 0;
-          this.backgroundPositionX = 0;
-          arr = target.style.backgroundPosition.split(" ");
-          px = parseFloat(arr[0]);
-          py = parseFloat(arr[1]);
-          if (!isNaN(px)) this.backgroundPositionX = px;
-          if (!isNaN(px)) this.backgroundPositionY = py;
-        }
-        if (!isNaN(parseFloat(target.style.backgroundPositionY))) {
-          this.backgroundPositionY = parseFloat(target.style.backgroundPositionY);
-        }
-        this.display = target.style.display ? target.style.display : "";
-        if (target.style.visible === "hidden") {
-          this.visible = false;
-        } else if (target.style.visible === "visible") {
-          this.visible = true;
-        } else {
-          this.visible = "NONE";
-        }
-      }
-    };
-
-    PropertyMapper.prototype.registerTween = function(tween) {
+    PropertyMapper.prototype._registerTweenForFIE = function(tween) {
       var c, f, find, fp, from, name, tl, to;
       to = tween._to;
       from = tween._from;
       c = {};
-      if (isFIE) {
-        for (name in to) {
-          if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY") {
-            tl = this._styleTweens || (this._styleTweens = new LinkedList());
-            fp = 0;
-            this._hasCss2Style = true;
-            if (from && !isNaN(from[name])) {
-              fp = from[name];
-            } else {
-              fp = !isNaN(this[name]) ? this[name] : PropertyMapper._defaults[name];
+      for (name in to) {
+        if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY") {
+          this._css2W.pushProperty(name);
+          tl = this._styleTweens || (this._styleTweens = new LinkedList());
+          fp = 0;
+          this._hasCss2Style = true;
+          if (from && !isNaN(from[name])) {
+            fp = from[name];
+          } else {
+            fp = !isNaN(this[name]) ? this[name] : PropertyMapper._defaults[name];
+          }
+          c[name] = to[name] - fp;
+          from[name] = fp;
+          f = tl.getFirst();
+          find = false;
+          while (f) {
+            if (f.elm.name === name) {
+              find = true;
+              f.elm.tween = tween;
+              break;
             }
-            c[name] = to[name] - fp;
-            from[name] = fp;
-            f = tl.getFirst();
-            find = false;
-            while (f) {
-              if (f.elm.name === name) {
-                find = true;
-                f.elm.tween = tween;
-                break;
-              }
-              f = f.next;
-            }
-            if (!find) {
-              tl.push({
-                name: name,
-                tween: tween
-              });
-            }
+            f = f.next;
+          }
+          if (!find) {
+            tl.push({
+              name: name,
+              tween: tween
+            });
           }
         }
-        Render.addListener(this);
-        return c;
       }
+      Render.addListener(this);
+      return c;
+    };
+
+    PropertyMapper.prototype._registerTween = function(tween) {
+      var c, f, find, fp, from, name, tl, to;
+      to = tween._to;
+      from = tween._from;
+      c = {};
       for (name in to) {
         if (name === "x" || name === "y" || name === "z" || name === "rotation" || name === "rotationX" || name === "rotationY" || name === "rotationZ" || name === "skewX" || name === "skewY" || name === "scaleX" || name === "scaleY") {
-          this._hasTransform = true;
+          this._trWrapper.pushProperty(name);
           fp = 0;
           if (from && !isNaN(from[name])) {
             fp = from[name];
@@ -694,7 +1137,7 @@
             f = f.next;
           }
         } else if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY") {
-          this._hasCss2Style = true;
+          this._css2W.pushProperty(name);
           tl = this._styleTweens || (this._styleTweens = new LinkedList());
           fp = 0;
           if (from && !isNaN(from[name])) {
@@ -721,7 +1164,7 @@
             });
           }
         } else if (name === "grayscale" || name === "sepia" || name === "saturate" || name === "hueRotate" || name === "invert" || name === "brightness" || name === "contrast" || name === "blur") {
-          this._hasFilter = true;
+          this._flWrapper.pushProperty(name);
           tl = this._filterTweens || (this._filterTweens = new LinkedList());
           fp = 0;
           if (from && !isNaN(from[name])) {
@@ -753,122 +1196,12 @@
       return c;
     };
 
-    PropertyMapper.prototype.applyStyles = function() {
-      if (isFIE) {
-        this._target.style.cssText = this._calcCss2();
-        return;
-      }
-      this._target.style.cssText = this.transitionStr + this._calcCss2() + this._calcFilter() + this._calcMatrix();
+    PropertyMapper.prototype._applyStyles = function() {
+      this._target.style.cssText = this.transitionStr + this._css2W.toStyleString() + this._flWrapper.toStyleString() + this._trWrapper.toStyleString();
     };
 
-    PropertyMapper.prototype._calcCss2 = function() {
-      var cssText, ta;
-      if (!this._hasCss2Style) return "";
-      cssText = "";
-      if (!isNaN(this.top)) cssText = cssText + ("top:" + this.top + "px;");
-      if (!isNaN(this.bottom)) {
-        cssText = cssText + ("bottom:" + this.bottom + "px;");
-      }
-      if (!isNaN(this.left)) cssText = cssText + ("left:" + this.left + "px;");
-      if (!isNaN(this.right)) cssText = cssText + ("right:" + this.right + "px;");
-      if (!isNaN(this.width)) cssText = cssText + ("width:" + this.width + "px;");
-      if (!isNaN(this.height)) {
-        cssText = cssText + ("height:" + this.height + "px;");
-      }
-      if (!isNaN(this.marginTop)) {
-        cssText = cssText + ("margin-top:" + this.marginTop + "px;");
-      }
-      if (!isNaN(this.marginBottom)) {
-        cssText = cssText + ("margin-bottom:" + this.marginBottom + "px;");
-      }
-      if (!isNaN(this.marginLeft)) {
-        cssText = cssText + ("margin-left:" + this.marginLeft + "px;");
-      }
-      if (!isNaN(this.marginRight)) {
-        cssText = cssText + ("margin-right:" + this.marginRight + "px;");
-      }
-      if (!isNaN(this.backgroundPositionY) || !isNaN(this.backgroundPositionX)) {
-        this.backgroundPositionX = isNaN(this.backgroundPositionX) ? 0 : this.backgroundPositionX;
-        this.backgroundPositionY = isNaN(this.backgroundPositionY) ? 0 : this.backgroundPositionY;
-        cssText = cssText + ("background-position:" + this.backgroundPositionX + "px " + this.backgroundPositionY + "px;");
-      }
-      if (!isNaN(this.alpha)) {
-        this.alpha = Math.round(this.alpha * 1000) / 1000;
-        if (!isFIE) {
-          cssText = cssText + ("opacity:" + this.alpha + ";");
-        } else {
-          ta = this.alpha * 100;
-          cssText = cssText + ("zoom:1;-ms-filter:\"alpha(opacity=" + ta + ")\";filter:alpha(opacity=" + ta + ");opacity:" + this.alpha + ";");
-        }
-      }
-      if (this.visible !== "NONE") {
-        if (this.visible) {
-          cssText = cssText + "visibility:visible;";
-        } else {
-          cssText = cssText + "visibility:hidden;";
-        }
-      }
-      if (this.display !== "") {
-        cssText = cssText + ("display:" + this.display + ";");
-      }
-      return cssText;
-    };
-
-    PropertyMapper.prototype._calcFilter = function() {
-      var filterTxt;
-      if (!this._hasFilter) return "";
-      filterTxt = "";
-      if (!isNaN(this.glayscale)) {
-        filterTxt = filterTxt + (" glayscale(" + this.glayscale + "%)");
-      }
-      if (!isNaN(this.sepia)) {
-        filterTxt = filterTxt + (" sepia(" + this.sepia + "%)");
-      }
-      if (!isNaN(this.saturate)) {
-        filterTxt = filterTxt + (" saturate(" + this.saturate + "%)");
-      }
-      if (!isNaN(this.hueRotate)) {
-        filterTxt = filterTxt + (" hue-rotate(" + this.blur + "deg)");
-      }
-      if (!isNaN(this.invert)) {
-        filterTxt = filterTxt + (" invert(" + this.invert + "%)");
-      }
-      if (!isNaN(this.brightness)) {
-        filterTxt = filterTxt + (" brightness(" + this.brightness + "%)");
-      }
-      if (!isNaN(this.contrast)) {
-        filterTxt = filterTxt + (" contrast(" + this.contrast + "%)");
-      }
-      if (!isNaN(this.blur)) {
-        filterTxt = filterTxt + (" blur(" + this.blur + "px)");
-      }
-      return this._filterName + ":" + filterTxt + ";";
-    };
-
-    PropertyMapper.prototype._calcMatrix = function() {
-      var trTxt;
-      if (!this._hasTransform) return "";
-      trTxt = "";
-      if (!isNaN(this.x)) trTxt = trTxt + (" translateX(" + this.x + "px)");
-      if (!isNaN(this.y)) trTxt = trTxt + (" translateY(" + this.y + "px)");
-      if (!isNaN(this.z)) trTxt = trTxt + (" translateZ(" + this.z + "px)");
-      if (!isNaN(this.rotation)) {
-        trTxt = trTxt + (" rotate(" + this.rotation + "deg)");
-      }
-      if (!isNaN(this.rotationX)) {
-        trTxt = trTxt + (" rotateX(" + this.rotationX + "deg)");
-      }
-      if (!isNaN(this.rotationY)) {
-        trTxt = trTxt + (" rotateY(" + this.rotationY + "deg)");
-      }
-      if (!isNaN(this.rotationZ)) {
-        trTxt = trTxt + (" rotateZ(" + this.rotationZ + "deg)");
-      }
-      if (!isNaN(this.skewX)) trTxt = trTxt + (" skewX(" + this.skewX + "deg)");
-      if (!isNaN(this.skewY)) trTxt = trTxt + (" skewY(" + this.skewY + "deg)");
-      if (!isNaN(this.scaleX)) trTxt = trTxt + (" scaleX(" + this.scaleX + ")");
-      if (!isNaN(this.scaleY)) trTxt = trTxt + (" scaleY(" + this.scaleY + ")");
-      return this._trcssName + ":" + trTxt + ";";
+    PropertyMapper.prototype._applyStylesForFIE = function() {
+      this._target.style.cssText = this._css2W.toStyleString();
     };
 
     PropertyMapper.prototype.applyProperties = function(properties, applyStyle) {
@@ -878,11 +1211,11 @@
         if (this[name] !== null) {
           change = true;
           if (name === "top" || name === "bottom" || name === "left" || name === "right" || name === "width" || name === "height" || name === "alpha" || name === "marginTop" || name === "marginBottom" || name === "marginRight" || name === "marginLeft" || name === "backgroundPositionX" || name === "backgroundPositionY" || name === "visible" || name === "display") {
-            this._hasCss2Style = true;
+            this._css2W.pushProperty(name);
           } else if (name === "x" || name === "y" || name === "z" || name === "rotation" || name === "rotationX" || name === "rotationY" || name === "rotationZ" || name === "skewX" || name === "skewY" || name === "scaleX" || name === "scaleY") {
-            this._hasTransform = true;
+            this._trWrapper.pushProperty(name);
           } else if (name === "grayscale" || name === "sepia" || name === "saturate" || name === "hueRotate" || name === "invert" || name === "brightness" || name === "contrast" || name === "blur") {
-            this._hasFilter = true;
+            this._flWrapper.pushProperty(name);
           }
           this[name] = properties[name];
         }
@@ -1005,11 +1338,11 @@
     };
 
     PropertyMapper.prototype.getTransformString = function() {
-      return this._calcMatrix();
+      return this._trWrapper.toStyleString();
     };
 
     PropertyMapper.prototype.getStyleString = function() {
-      return this._calcCss2();
+      return this._css2W.toStyleString();
     };
 
     return PropertyMapper;
@@ -1242,7 +1575,7 @@
 
     BasicTween.prototype.update = function(ct, prop) {
       if (ct >= this._endTime) {
-        this._mapper[prop] = (this._easing.update(this._duration, this._from[prop], this._c[prop], this._duration) * 1000 | 0) / 1000;
+        this._mapper[prop] = this._easing.update(this._duration, this._from[prop], this._c[prop], this._duration);
         this._state = TweenState.Completed;
         return;
       }
@@ -1856,7 +2189,6 @@
       this._state = TweenState.Initialized;
       this._animationName = VenderInfo.vender + "Animation";
       this._animationEnd = VenderInfo.animationEnd;
-      console.log(this._animationEnd);
       this._animationNameCSS = VenderInfo.cssVender + "animation";
       this._delegate = function() {
         return _this._onAnimationEnd();
