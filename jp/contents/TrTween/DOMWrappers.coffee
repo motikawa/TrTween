@@ -253,8 +253,6 @@ class FSW
 		m = @_mapper
 		p = @_pl
 		for val,i in @_hasProperties
-			# if val is null
-			# 	continue
 			obj = p[val]
 			v = ((m[val] * 1000) | 0) * .001
 			trstr += obj.prefix + v+ obj.sufix
@@ -264,63 +262,95 @@ class CSS2W
 	@_propList = {
 		top:{
 			prefix:"top:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.top * 1000)|0) * .001
 		},
 		bottom:{
 			prefix:"bottom:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.bottom * 1000)|0) * .001
 		},
 		left:{
 			prefix:"left:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.left * 1000)|0) * .001
 		},
 		right:{
 			prefix:"right:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.right * 1000)|0) * .001
 		},
 		width:{
 			prefix:"width:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.width * 1000)|0) * .001
 		},
 		height:{
 			prefix:"height:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.height * 1000)|0) * .001
 		},
 		margin:{
 			prefix:"margin:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.margin * 1000)|0) * .001
 		}
 		marginTop:{
 			prefix:"margin-top:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.marginTop * 1000)|0) * .001
 		},
 		marginBottom:{
 			prefix:"margin-bottom:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.marginBottom * 1000)|0) * .001
 		},
 		marginLeft:{
 			prefix:"margin-left:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.marginLeft * 1000)|0) * .001
 		},
 		marginRight:{
 			prefix:"margin-right:",
-			sufix:"px;"
+			sufix:"px;",
+			fixFunc:(m)->
+				return ((m.marginRight * 1000)|0) * .001
 		},
 		alpha:{
 			prefix:"opacity:",
-			sufix:";"
+			sufix:";",
+			fixFunc:(m)->
+				return ((m.alpha * 1000)|0) * .001
 		},
 		backgroundPosition:{
 			prefix:"background-position:",
-			sufix:";"
+			sufix:";",
+			fixFunc:(m)->
+				vx = ((m.backgroundPositionX * 1000)|0) * .001
+				vy = ((m.backgroundPositionY * 1000)|0) * .001
+				return vx + "px " + vy + "px"
 		},
 		visible:{
 			prefix:"visibility:",
-			sufix:";"
+			sufix:";",
+			fixFunc:(m)->
+				return if m.visible then "visible" else "hidden"
 		},
 		display:{
 			prefix:"display:",
-			sufix:";"
+			sufix:";",
+			fixFunc:(m)->
+				return m.display
 		}
 	}
 	@init:->
@@ -331,15 +361,21 @@ class CSS2W
 		else if bn is "ie" and ver > 8
 			return
 
+
 		if ver >= 8
 			CSS2W._propList.alpha = {
 				prefix:"zoom:1;-ms-filter:\"alpha(opacity=",
-				sufix:")\";"
+				sufix:")\";",
+				fixFunc:(m)->
+					return ((m.alpha * 1000)|0) * .1
+				
 			}
 		else
 			CSS2W._propList.alpha = {
 				prefix:"zoom:1;filter:alpha(opacity=",
-				sufix:");"
+				sufix:");",
+				fixFunc:(m)->
+					return ((m.alpha * 1000)|0) * .1
 			}
 	_parsePropaties:->
 		owner = @
@@ -402,6 +438,7 @@ class CSS2W
 			return ""
 		@_parsePropaties()
 		return
+
 	pushProperty:(propname)->
 		if propname is "backgroundPositionY" or propname is "backgroundPositionX" or propname is "backgroundPosition"
 			if isNaN(@_mapper.backgroundPositionX)
@@ -417,28 +454,15 @@ class CSS2W
 		@_hasProperties[@_hasProperties.length] = propname
 		@toStyleString = @_toStyleString
 		return
+
 	_toStyleString:->
 		trstr = ""
 		m = @_mapper
 		p = @_pl
 		for val,i in @_hasProperties
-			# if val is null
-			# 	continue
 			obj = p[val]
-			if val is "backgroundPosition"
-				vx = ((m.backgroundPositionX * 1000) | 0) * .001
-				vy = ((m.backgroundPositionY * 1000) | 0) * .001
-				trstr += obj.prefix + vx + " " + vy + obj.sufix
-			else if val is "visible"
-				v = if m.visible then "visible" else "hidden"
-				trstr += obj.prefix + v+ obj.sufix
-
-			else if val is "display"
-				v = m[val]
-				trstr += obj.prefix + v+ obj.sufix
-			else
-				v = ((m[val] * 1000) | 0) * .001
-				trstr += obj.prefix + v+ obj.sufix
-		return trstr + ";"
+			v = obj.fixFunc(m)
+			trstr += obj.prefix + v+ obj.sufix
+		return trstr
 
 CSS2W.init()

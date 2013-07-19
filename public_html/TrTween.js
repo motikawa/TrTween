@@ -708,63 +708,115 @@
     CSS2W._propList = {
       top: {
         prefix: "top:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.top * 1000) | 0) * .001;
+        }
       },
       bottom: {
         prefix: "bottom:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.bottom * 1000) | 0) * .001;
+        }
       },
       left: {
         prefix: "left:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.left * 1000) | 0) * .001;
+        }
       },
       right: {
         prefix: "right:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.right * 1000) | 0) * .001;
+        }
       },
       width: {
         prefix: "width:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.width * 1000) | 0) * .001;
+        }
       },
       height: {
         prefix: "height:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.height * 1000) | 0) * .001;
+        }
       },
       margin: {
         prefix: "margin:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.margin * 1000) | 0) * .001;
+        }
       },
       marginTop: {
         prefix: "margin-top:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.marginTop * 1000) | 0) * .001;
+        }
       },
       marginBottom: {
         prefix: "margin-bottom:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.marginBottom * 1000) | 0) * .001;
+        }
       },
       marginLeft: {
         prefix: "margin-left:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.marginLeft * 1000) | 0) * .001;
+        }
       },
       marginRight: {
         prefix: "margin-right:",
-        sufix: "px;"
+        sufix: "px;",
+        fixFunc: function(m) {
+          return ((m.marginRight * 1000) | 0) * .001;
+        }
       },
       alpha: {
         prefix: "opacity:",
-        sufix: ";"
+        sufix: ";",
+        fixFunc: function(m) {
+          return ((m.alpha * 1000) | 0) * .001;
+        }
       },
       backgroundPosition: {
         prefix: "background-position:",
-        sufix: ";"
+        sufix: ";",
+        fixFunc: function(m) {
+          var vx, vy;
+          vx = ((m.backgroundPositionX * 1000) | 0) * .001;
+          vy = ((m.backgroundPositionY * 1000) | 0) * .001;
+          return vx + "px " + vy + "px";
+        }
       },
       visible: {
         prefix: "visibility:",
-        sufix: ";"
+        sufix: ";",
+        fixFunc: function(m) {
+          if (m.visible) {
+            return "visible";
+          } else {
+            return "hidden";
+          }
+        }
       },
       display: {
         prefix: "display:",
-        sufix: ";"
+        sufix: ";",
+        fixFunc: function(m) {
+          return m.display;
+        }
       }
     };
 
@@ -780,12 +832,18 @@
       if (ver >= 8) {
         return CSS2W._propList.alpha = {
           prefix: "zoom:1;-ms-filter:\"alpha(opacity=",
-          sufix: ")\";"
+          sufix: ")\";",
+          fixFunc: function(m) {
+            return ((m.alpha * 1000) | 0) * .1;
+          }
         };
       } else {
         return CSS2W._propList.alpha = {
           prefix: "zoom:1;filter:alpha(opacity=",
-          sufix: ");"
+          sufix: ");",
+          fixFunc: function(m) {
+            return ((m.alpha * 1000) | 0) * .1;
+          }
         };
       }
     };
@@ -880,7 +938,7 @@
     };
 
     CSS2W.prototype._toStyleString = function() {
-      var i, m, obj, p, trstr, v, val, vx, vy, _len, _ref;
+      var i, m, obj, p, trstr, v, val, _len, _ref;
       trstr = "";
       m = this._mapper;
       p = this._pl;
@@ -888,22 +946,10 @@
       for (i = 0, _len = _ref.length; i < _len; i++) {
         val = _ref[i];
         obj = p[val];
-        if (val === "backgroundPosition") {
-          vx = ((m.backgroundPositionX * 1000) | 0) * .001;
-          vy = ((m.backgroundPositionY * 1000) | 0) * .001;
-          trstr += obj.prefix + vx + " " + vy + obj.sufix;
-        } else if (val === "visible") {
-          v = m.visible ? "visible" : "hidden";
-          trstr += obj.prefix + v + obj.sufix;
-        } else if (val === "display") {
-          v = m[val];
-          trstr += obj.prefix + v + obj.sufix;
-        } else {
-          v = ((m[val] * 1000) | 0) * .001;
-          trstr += obj.prefix + v + obj.sufix;
-        }
+        v = obj.fixFunc(m);
+        trstr += obj.prefix + v + obj.sufix;
       }
-      return trstr + ";";
+      return trstr;
     };
 
     return CSS2W;
@@ -1470,13 +1516,6 @@
 
     BasicTween.prototype.tickUpdate = function() {
       if (this._onUpdate) this._onUpdate(this);
-    };
-
-    BasicTween.prototype.tickOverwrite = function() {
-      if (this._state === TweenState.Completed || this._state === TweenState.Finalized) {
-        return;
-      }
-      if (this._onOverwrited) return this._onOverwrited(this);
     };
 
     BasicTween.prototype.stop = function() {

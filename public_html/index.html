@@ -2,73 +2,92 @@
 	<head>
 		<meta charset="UTF-8">
 		<style>
-			body {background: #fff;}
-			.test{
-				width: 16px;height: 16px;
-				float: left;
-				margin: 1px;
-				border: 2px #f99 solid;
-				background: #99f;
-				overflow: hidden;
-				
+			body {background: #E6CEC8;}
+			#wrapper{
+				width: 960px;
+				position: relative;
+				margin:0 auto;
+				background: #f1f1f1;
+			}
+			.box{
+				width: 136px;height: 136px;
+				background: #fff;				
 				text-align: center;
-				line-height: 20px;
+				line-height: 36px;
 				font-size: 10px;
 				position: absolute;
+				top:50%;margin-top: -68px;
+				border-radius: 20px;
 			}
-			#box{
-				width:400px;height: 100px;
-				position: absolute;
-				top:0px;
+			.boxcon{
+				width: 685px;height: 190px;
+				background: #aaa;
+				position: relative;
+				border-radius: 20px;
+				padding: 10px;
 			}
-			#cvs{
-				background: transparent;
+			figure{
+				width:705px;
+				margin: 0 auto;
 			}
+			figcaption{
+				padding: .2em;
+			}
+			li{
+				list-style-type: none;
+				float: left;
+			}
+			a{
+				width: 100%;height: 100%;
+				display: block;
+			}
+			input[type='button']{
+				width: 80px;
+				margin: 5px;
+			}
+
+			.clearfix:after {  
+			  content: ".";   
+			  display: block;   
+			  height: 0;   
+			  clear: both;   
+			  visibility: hidden;  
+			}
+			.clearfix {display: block;}
 		</style>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script type="text/javascript" src="easings.js"></script>
 		<script type="text/javascript" src="TrTween.js"></script>
 		<script type="text/javascript">
 			var Sine    = jp.contents.easing.Sine,
-			Quart   = jp.contents.easing.Quart,
-			Expo    = jp.contents.easing.Expo,
-			Bounce  = jp.contents.easing.Bounce,
-			TrTween = jp.contents.TrTween.TrTween;
+				Quart   = jp.contents.easing.Quart,
+				Expo    = jp.contents.easing.Expo,
+				Bounce  = jp.contents.easing.Bounce,
+				TrTween = jp.contents.TrTween.TrTween;
+			$(document).ready(function(){
+				$("#normalTween")
 
 
-			$(document).ready(function()
-			{
-				var tweens = [],
-					con = $("#box"),
-					i = 0,len = 10,trect;
-				for(i = 0; i < len ; i++)
-				{
-					trect = $("<div class='test'>"+ i.toString() + "</div>")[0];
-					con.append(trect);
-					tweens[i] = TrTween.tween(trect,{top:10*i,scaleX:1.2,scaleY:1.2,rotation:90},null,2,Quart.easeOut);
-				}
-				
-				TrTween.delay(TrTween.tween(trect,{top:10,scaleX:1},null,1,Quart.easeOut),.5).play();
-				var pt = TrTween.parallelTweens(tweens);
-				pt.onComplete(function(){
-					console.log("end!")
-				});
-				pt.play();
-				
 
 
-				
+
 			});
-			
 			
 		</script>
 	</head>
 	<body>
-		<div id="box">
-			<!-- <div class="test">aaaa</div> -->
-		</div>
-		<div>
-			<canvas id="cvs" width="256" height="256" />
-		</div>
+		<section id="wrapper">
+		<figure id="normalTween">
+			<figcaption>■Normal Tween</figcaption>	
+			<div class="boxcon">
+				<div class="box"></div>
+			</div>
+			<ul class="clearfix">
+			<li><input type='button' value="play" name="play" /></li>
+			<li><input type='button' value="stop" name="stop" /></li>
+			</ul>
+		</figure>
+
+		</section>
 	</body>
 </html>
