@@ -51,7 +51,14 @@ class TransitionTween extends ICSSTween
 		if trprop isnt ""	
 			props.push(trprop)
 		return props.join(",")
-
+	stop:->
+		setTimeout(=>
+			clearTimeout(@_cid)
+			@_target.style[@_transitionName] = null
+			@_mapper.transitionStr = ""
+		,0)
+		
+		return
 	play:->
 		mapper = @_mapper
 		mapper.applyProperties(@_from,true)

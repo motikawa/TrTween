@@ -107,7 +107,7 @@ class PropertyMapper
 			@registerTween = @_registerTween
 			@applyStyles   = @_applyStyles
 		return
-	_registerTweenForFIE:(tween)->
+	_registerTweenForFIE:(tween,fixOnly = false)->
 		to = tween._to
 		from = tween._from
 		c = {}
@@ -135,6 +135,8 @@ class PropertyMapper
 						fp = if !isNaN(@[name]) then @[name] else PropertyMapper._defaults[name]
 					c[name] = to[name] - fp
 					from[name] = fp
+					if fixOnly
+						continue
 					f = tl.getFirst()
 					find = false
 					while f
@@ -147,7 +149,7 @@ class PropertyMapper
 						tl.push({name:name,tween:tween})
 		Render.addListener(@)
 		return c
-	_registerTween:(tween)->
+	_registerTween:(tween,fixOnly = false)->
 		to = tween._to
 		from = tween._from
 		c = {}
@@ -174,8 +176,12 @@ class PropertyMapper
 					c[name] = to[name] - fp
 
 					tl = @_tweens || @_tweens = new LinkedList()
+					if fixOnly
+						continue
 					f = tl.getFirst()
 					find = false
+					if fixOnly
+						continue
 					while f
 						if f.elm.name is name
 							find = true
@@ -205,10 +211,14 @@ class PropertyMapper
 							fp = from[name]
 						else
 							fp = if !isNaN(@[name]) then @[name] else PropertyMapper._defaults[name]
+						# console.log(name,fp)
 						c[name] = to[name] - fp
 						from[name] = fp
+						if fixOnly
+							continue
 						f = tl.getFirst()
 						find = false
+
 						while f
 							if f.elm.name is name
 								find = true
@@ -236,6 +246,8 @@ class PropertyMapper
 						c[name] = to[name] - fp
 
 						tl = @_tweens || @_tweens = new LinkedList()
+						if fixOnly
+							continue
 						f = tl.getFirst()
 						find = false
 						while f

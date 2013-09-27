@@ -254,7 +254,8 @@ class FSW
 		p = @_pl
 		for val,i in @_hasProperties
 			obj = p[val]
-			v = ((m[val] * 1000) | 0) * .001
+			# v = ((m[val] * 10000) | 0) * .0001
+			v = m[val]
 			trstr += obj.prefix + v+ obj.sufix
 		return trstr + ";"
 

@@ -2,7 +2,7 @@
 
   'use strict';
 
-  var APP_BROWSER, APP_OS, AnimationTween, Application, BasicTween, BezierTween, BrowserName, CSS2W, CSS3Easing, DelayTween, Delegate, EasingTween, FSW, FuncTween, ICSSTween, ITween, ITweenGroup, Linear, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Render, RepeatTween, SerialTween, TSW, TrTween, TransitionTween, TweenState, VenderInfo, cancelAnimationFrame, isFIE, isIOS, requestAnimationFrame;
+  var APP_BROWSER, APP_OS, AnimationTween, Application, BasicTween, BezierTween, BrowserName, CSS2W, CSS3Easing, DelayTween, Delegate, EasingTween, FSW, FuncTween, ICSSTween, ITween, ITweenGroup, Linear, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Render, RepeatTween, SerialTween, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, isFIE, isIOS, requestAnimationFrame;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   BrowserName = {
@@ -693,7 +693,7 @@
       for (i = 0, _len = _ref.length; i < _len; i++) {
         val = _ref[i];
         obj = p[val];
-        v = ((m[val] * 1000) | 0) * .001;
+        v = m[val];
         trstr += obj.prefix + v + obj.sufix;
       }
       return trstr + ";";
@@ -1069,8 +1069,9 @@
       return;
     }
 
-    PropertyMapper.prototype._registerTweenForFIE = function(tween) {
+    PropertyMapper.prototype._registerTweenForFIE = function(tween, fixOnly) {
       var c, f, find, fp, from, name, tl, to;
+      if (fixOnly == null) fixOnly = false;
       to = tween._to;
       from = tween._from;
       c = {};
@@ -1086,6 +1087,7 @@
           }
           c[name] = to[name] - fp;
           from[name] = fp;
+          if (fixOnly) continue;
           f = tl.getFirst();
           find = false;
           while (f) {
@@ -1108,8 +1110,9 @@
       return c;
     };
 
-    PropertyMapper.prototype._registerTween = function(tween) {
+    PropertyMapper.prototype._registerTween = function(tween, fixOnly) {
       var c, f, find, fp, from, name, tl, to;
+      if (fixOnly == null) fixOnly = false;
       to = tween._to;
       from = tween._from;
       c = {};
@@ -1125,8 +1128,10 @@
           from[name] = fp;
           c[name] = to[name] - fp;
           tl = this._tweens || (this._tweens = new LinkedList());
+          if (fixOnly) continue;
           f = tl.getFirst();
           find = false;
+          if (fixOnly) continue;
           while (f) {
             if (f.elm.name === name) {
               find = true;
@@ -1152,6 +1157,7 @@
           }
           c[name] = to[name] - fp;
           from[name] = fp;
+          if (fixOnly) continue;
           f = tl.getFirst();
           find = false;
           while (f) {
@@ -1179,6 +1185,7 @@
           from[name] = fp;
           c[name] = to[name] - fp;
           tl = this._tweens || (this._tweens = new LinkedList());
+          if (fixOnly) continue;
           f = tl.getFirst();
           find = false;
           while (f) {
@@ -1436,6 +1443,10 @@
       return this._state;
     };
 
+    ITween.prototype.gotoAndStop = function(parsent) {};
+
+    ITween.prototype.gotoAndPlay = function(parsent) {};
+
     return ITween;
 
   })();
@@ -1532,6 +1543,56 @@
       return new BasicTween(this._target, this._tp, this._from, this._duration / 1000, this._easing);
     };
 
+    BasicTween.prototype.gotoAndStop = function(parsent) {
+      var ct, val;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      if (parsent === 1 && this._state === TweenState.Completed || parsent === 0 && this._state === TweenState.Initialized) {
+        return;
+      }
+      this._st = Date.now != null ? Date.now() : new Date().getTime();
+      this._endTime = this._st + this._duration;
+      ct = this._st + this._duration * parsent;
+      if (!(this._c != null)) this._c = this._mapper.registerTween(this, true);
+      if (parsent === 0) {
+        if (this._state !== TweenState.Initialized) {
+          for (val in this._to) {
+            this.update(ct, val);
+            this._mapper.applyStyles();
+          }
+          this._c = null;
+          this._state = TweenState.Initialized;
+        }
+        return;
+      } else if (parsent === 1) {
+        if (this._state !== TweenState.Completed) {
+          for (val in this._to) {
+            this.update(ct, val);
+            this._mapper.applyStyles();
+          }
+          this._c = null;
+          this._state = TweenState.Completed;
+        }
+        return;
+      } else {
+        this._state = TweenState.Playing;
+        for (val in this._to) {
+          this.update(ct, val);
+          this._mapper.applyStyles();
+        }
+      }
+    };
+
+    BasicTween.prototype.gotoAndPlay = function(parsent) {
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      this._state = TweenState.Playing;
+      this._c = this._mapper.registerTween(this);
+      this._st = Date.now != null ? Date.now() : new Date().getTime();
+      this._st = this._st - (this._duration * parsent);
+      this._endTime = this._st + this._duration;
+      if (Render.getState() === 0) Render.start();
+      if (this._onPlay) this._onPlay(this);
+    };
+
     return BasicTween;
 
   })();
@@ -1542,6 +1603,7 @@
 
     function DelayTween(tween, delay) {
       var _this = this;
+      if (delay == null) delay = 0;
       this._delay = delay * 1000;
       this._tween = tween;
       this._tween.onComplete(function() {
@@ -1585,6 +1647,35 @@
 
     DelayTween.prototype.clone = function() {
       return new DelayTween(this._tween.clone(), this._delay / 1000);
+    };
+
+    DelayTween.prototype.gotoAndStop = function(parsent) {
+      var dp, p, td, tp;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      td = this._tween.getDuration() * 1000;
+      p = this._delay + td;
+      dp = this._delay / p;
+      tp = td / p;
+      if (parsent > dp) {
+        this._tween.gotoAndStop((parsent - dp) / tp);
+      } else {
+        this._tween.gotoAndStop(0);
+      }
+    };
+
+    DelayTween.prototype.gotoAndPlay = function(parsent) {
+      var dp, p, td, tp;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      td = this._tween.getDuration() * 1000;
+      p = this._delay + td;
+      dp = this._delay / p;
+      tp = td / p;
+      if (parsent > dp) {
+        this._tween.gotoAndPlay((parsent - dp) / tp);
+      } else {
+        this._delay = ((dp - parsent) / dp) * this._delay;
+        this.play();
+      }
     };
 
     return DelayTween;
@@ -1639,6 +1730,7 @@
       this._tween.onComplete(function() {
         return _this._repeatPlay();
       });
+      this._duration = this._getDuration();
     }
 
     RepeatTween.prototype.play = function() {
@@ -1660,6 +1752,10 @@
     };
 
     RepeatTween.prototype.getDuration = function() {
+      return this._duration;
+    };
+
+    RepeatTween.prototype._getDuration = function() {
       if (this._count === 0) {
         return Infinity;
       } else {
@@ -1676,6 +1772,30 @@
       return new RepeatTween(this._tween.clone(), this._count);
     };
 
+    RepeatTween.prototype.gotoAndStop = function(parsent) {
+      var r, s, td, tp;
+      if (this._count === 0) throw new Error("ないよ");
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      tp = this._duration * parsent;
+      td = this._tween.getDuration();
+      r = ~~(tp / td) - 1;
+      s = tp - (r * td);
+      this._ct = r;
+      this._tween.gotoAndStop(s / td);
+    };
+
+    RepeatTween.prototype.gotoAndPlay = function(parsent) {
+      var r, s, td, tp;
+      if (this._count === 0) throw new Error("ないよ");
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      tp = this._duration * parsent;
+      td = this._tween.getDuration();
+      r = ~~(tp / td) - 1;
+      s = tp - (r * td);
+      this._ct = r;
+      this._tween.gotoAndPlay(s / td);
+    };
+
     return RepeatTween;
 
   })();
@@ -1687,6 +1807,7 @@
     function ParallelTween(tweens) {
       this._tweens = tweens;
       this._state = TweenState.Initialized;
+      this._duration = this._getDuration();
       return;
     }
 
@@ -1731,6 +1852,10 @@
     };
 
     ParallelTween.prototype.getDuration = function() {
+      return this._duration;
+    };
+
+    ParallelTween.prototype._getDuration = function() {
       var dur, max, val, _i, _len, _ref;
       max = -1;
       _ref = this._tweens;
@@ -1753,6 +1878,46 @@
       return new ParallelTween(tweens);
     };
 
+    ParallelTween.prototype.gotoAndStop = function(parsent) {
+      var p, st, td, val, _i, _len, _ref;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      if (parsent === 1 && this._state === TweenState.Completed || parsent === 0 && this._state === TweenState.Initialized) {
+        return;
+      }
+      p = this.getDuration();
+      st = p * parsent;
+      _ref = this._tweens;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        val = _ref[_i];
+        td = val.getDuration();
+        val.gotoAndStop(st / td);
+      }
+      if (parsent === 1) {
+        if (this._state !== TweenState.Completed) {
+          return this._state = TweenState.Completed;
+        }
+      } else if (parsent === 0) {
+        if (this._state !== TweenState.Initialized) {
+          return this._state = TweenState.Initialized;
+        }
+      } else {
+        return this._state = TweenState.Playing;
+      }
+    };
+
+    ParallelTween.prototype.gotoAndPlay = function(parsent) {
+      var p, st, td, val, _i, _len, _ref;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      p = this.getDuration();
+      st = p * parsent;
+      _ref = this._tweens;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        val = _ref[_i];
+        td = val.getDuration();
+        val.gotoAndPlay(st / td);
+      }
+    };
+
     return ParallelTween;
 
   })();
@@ -1766,6 +1931,7 @@
       this._current = null;
       this._index = 0;
       this._state = TweenState.Initialized;
+      this._duration = this._getDuration();
       return;
     }
 
@@ -1779,6 +1945,7 @@
     SerialTween.prototype.stop = function() {
       this._state = TweenState.Stoped;
       if (this._current) this._current.stop();
+      if (this._onStop) this._onStop(this);
     };
 
     SerialTween.prototype._playTween = function() {
@@ -1804,6 +1971,10 @@
     };
 
     SerialTween.prototype.getDuration = function() {
+      return this._duration;
+    };
+
+    SerialTween.prototype._getDuration = function() {
       var dur, val, _i, _len, _ref;
       dur = 0;
       _ref = this._tweens;
@@ -1823,6 +1994,67 @@
         tweens[i] = val.clone();
       }
       return new SerialTween(tweens);
+    };
+
+    SerialTween.prototype.gotoAndStop = function(parsent) {
+      var duration, p, totalDuration, val, vp, _i, _len, _ref;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      if (parsent === 1 && this._state === TweenState.Completed || parsent === 0 && this._state === TweenState.Initialized) {
+        return;
+      }
+      p = this.getDuration() * parsent;
+      totalDuration = 0;
+      if (parsent === 1) {
+        if (this._state !== TweenState.Completed) {
+          this._state = TweenState.Completed;
+        }
+      } else if (parsent === 0) {
+        if (this._state !== TweenState.Initialized) {
+          this._state = TweenState.Initialized;
+        }
+      } else {
+        this._state = TweenState.Playing;
+      }
+      _ref = this._tweens;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        val = _ref[_i];
+        duration = val.getDuration();
+        if (totalDuration > p) {
+          if (val._state !== TweenState.Initialized) val.gotoAndStop(0);
+        } else if (totalDuration + duration <= p) {
+          if (val._state !== TweenState.Completed) val.gotoAndStop(1);
+        } else {
+          vp = (p - totalDuration) / duration;
+          val.gotoAndStop(vp);
+        }
+        totalDuration = totalDuration + duration;
+        if (parsent === 1) {
+          val._state = TweenState.Completed;
+        } else if (parsent === 0) {
+          val._state = TweenState.Initialized;
+        }
+      }
+    };
+
+    SerialTween.prototype.gotoAndPlay = function(parsent) {
+      var bmp, mp, p, tp, val, _i, _len, _ref, _results;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      p = this.getDuration();
+      mp = bmp = 0;
+      _ref = this._tweens;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        val = _ref[_i];
+        mp = val.getDuration() / p;
+        tp = (parsent - bmp) / mp;
+        if (tp < 0 || tp >= 1) {
+          val.gotoAndStop(tp);
+        } else {
+          val.gotoAndPlay(tp);
+        }
+        _results.push(bmp = bmp + mp);
+      }
+      return _results;
     };
 
     return SerialTween;
@@ -1845,6 +2077,7 @@
       this._index = 0;
       this._max = this._tweens.length - 1;
       this._timers = [];
+      this._totalDuration = this._getDuration();
       return;
     }
 
@@ -1900,7 +2133,50 @@
       if (this._onComplete) this._onComplete(this);
     };
 
-    EasingTween.prototype.getDuration = function() {};
+    EasingTween.prototype.getDuration = function() {
+      return this._totalDuration;
+    };
+
+    EasingTween.prototype._getDuration = function() {
+      var d, delay, durations, easing, i, len, time, val, _len, _ref;
+      len = this._max;
+      d = this._duration;
+      easing = this._easing;
+      durations = [];
+      _ref = this._tweens;
+      for (i = 0, _len = _ref.length; i < _len; i++) {
+        val = _ref[i];
+        time = d * i / len;
+        delay = d - easing.update(d - time, 0, d, d);
+        durations.push(delay + val.getDuration() * 1000);
+      }
+      return Math.max.apply(null, durations) / 1000;
+    };
+
+    EasingTween.prototype.gotoAndStop = function(parsent) {
+      var bmp, bt, d, delay, durations, easing, i, len, p, td, time, tmp, tp, val, _len, _ref;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      len = this._max;
+      p = this.getDuration();
+      d = this._duration / 1000;
+      easing = this._easing;
+      durations = [];
+      tp = p * parsent;
+      bmp = bt = 0;
+      _ref = this._tweens;
+      for (i = 0, _len = _ref.length; i < _len; i++) {
+        val = _ref[i];
+        time = d * i / len;
+        delay = d - easing.update(d - time, 0, d, d);
+        if (delay > tp) {
+          val.gotoAndStop(0);
+        } else {
+          tmp = tp - delay;
+          td = val.getDuration();
+          val.gotoAndStop(tmp / td);
+        }
+      }
+    };
 
     EasingTween.prototype.clone = function() {
       var i, tweens, val, _len, _ref;
@@ -1926,7 +2202,7 @@
       this._params = params || [];
       this._caller = caller || this;
       this._state = TweenState.Initialized;
-      this._duration = 0;
+      this._duration = 25;
       return;
     }
 
@@ -1936,7 +2212,7 @@
       this._func.apply(this._caller, this._params);
       setTimeout(function() {
         return _this.finalize();
-      });
+      }, this._duration);
     };
 
     FuncTween.prototype.clone = function() {
@@ -1948,7 +2224,84 @@
       if (this._onComplete) this._onComplete(this);
     };
 
+    FuncTween.prototype.gotoAndStop = function(parsent) {
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      if (parsent === 1) {
+        this._func.apply(this._caller, this._params);
+        this._state = TweenState.Completed;
+      } else if (parsent === 0) {
+        this._state = TweenState.Initialized;
+      } else {
+        this._state = TweenState.Playing;
+      }
+    };
+
+    FuncTween.prototype.gotoAndPlay = function(parsent) {
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      if (parsent === 1) {
+        this._func.apply(this._caller, this._params);
+        this._state = TweenState.Completed;
+      } else if (parsent === 0) {
+        this._state = TweenState.Initialized;
+      } else {
+        this._state = TweenState.Playing;
+      }
+    };
+
     return FuncTween;
+
+  })();
+
+  WaitTween = (function() {
+
+    __extends(WaitTween, ITween);
+
+    function WaitTween(time) {
+      this._duration = time * 1000;
+      this._cd = this._duration;
+    }
+
+    WaitTween.prototype.play = function() {
+      var _this = this;
+      this._state = TweenState.Playing;
+      this._cid = setTimeout(function() {
+        return _this.finalize();
+      }, this._cd);
+    };
+
+    WaitTween.prototype.stop = function() {
+      clearTimeout(this._cid);
+    };
+
+    WaitTween.prototype.clone = function() {
+      return new WaitTween(this._duration);
+    };
+
+    WaitTween.prototype.finalize = function() {
+      this._state = TweenState.Finalized;
+      if (this._onComplete) this._onComplete(this);
+    };
+
+    WaitTween.prototype.gotoAndStop = function(parsent) {
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      this._cd = this._duration - this._duration * parsent;
+      if (parsent === 1) {
+        this._state = TweenState.Completed;
+      } else if (parsent === 0) {
+        this._state = TweenState.Initialized;
+      } else {
+        this._state = TweenState.Playing;
+      }
+    };
+
+    WaitTween.prototype.gotoAndPlay = function(parsent) {
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      this._duration = this._cd - this._cd * parsent;
+      this._cd = this._duration - this._duration * parsent;
+      this.play();
+    };
+
+    return WaitTween;
 
   })();
 
@@ -1959,7 +2312,8 @@
     function PropertyTween(target, properties) {
       this._target = target;
       this._prop = properties;
-      this._duration = 0;
+      this._duration = 25;
+      this._bProps = null;
       return;
     }
 
@@ -1980,6 +2334,44 @@
 
     PropertyTween.prototype.clone = function() {
       return new PropertyTween(this._target, this._prop);
+    };
+
+    PropertyTween.prototype.gotoAndStop = function(parsent) {
+      var mapper, val;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      if (parsent === 1) {
+        mapper = PropertyMapper.getMapper(this._target);
+        this._bProps = {};
+        for (val in this._prop) {
+          this._bProps[val] = mapper[val];
+        }
+        mapper.applyProperties(this._prop, true);
+        this._state = TweenState.Completed;
+      } else if (parsent === 0) {
+        this._state = TweenState.Initialized;
+        if (this._bProps != null) {
+          mapper = PropertyMapper.getMapper(this._target);
+          mapper.applyProperties(this._bProps, true);
+          this._bProps = null;
+        }
+      } else {
+        this._state = TweenState.Playing;
+        if (this._bProps != null) {
+          mapper = PropertyMapper.getMapper(this._target);
+          mapper.applyProperties(this._bProps, true);
+          this._bProps = null;
+        }
+      }
+    };
+
+    PropertyTween.prototype.gotoAndPlay = function(parsent) {
+      var mapper;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      if (parsent === 1) {
+        mapper = PropertyMapper.getMapper(this._target);
+        mapper.applyProperties(this._prop, true);
+        this._state = TweenState.Completed;
+      }
     };
 
     return PropertyTween;
@@ -2032,6 +2424,15 @@
       }
       if (trprop !== "") props.push(trprop);
       return props.join(",");
+    };
+
+    TransitionTween.prototype.stop = function() {
+      var _this = this;
+      setTimeout(function() {
+        clearTimeout(_this._cid);
+        _this._target.style[_this._transitionName] = null;
+        return _this._mapper.transitionStr = "";
+      }, 0);
     };
 
     TransitionTween.prototype.play = function() {
@@ -2215,11 +2616,11 @@
       return new PropertyTween(target, propaties);
     };
 
-    TrTween.apply = function(target, propaties) {
-      return new PropertyTween(target, propaties);
+    TrTween.wait = function(time) {
+      return new WaitTween(time);
     };
 
-    TrTween.version = "0.1.5";
+    TrTween.version = "0.2.1";
 
     TrTween.DefaultEasing = Linear.easeNone;
 

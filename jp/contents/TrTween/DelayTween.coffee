@@ -1,5 +1,5 @@
 class DelayTween extends ITween
-	constructor:(tween,delay)->
+	constructor:(tween,delay = 0)->
 		@_delay = delay * 1000
 		@_tween = tween
 		@_tween.onComplete(=>
@@ -40,3 +40,29 @@ class DelayTween extends ITween
 		return @_tween.getState()
 	clone:->
 		return new DelayTween(@_tween.clone(),@_delay/ 1000)
+	gotoAndStop:(parsent)->
+		parsent = if parsent > 1 then 1 else if parsent < 0 then 0 else parsent
+		td = @_tween.getDuration() * 1000
+		p = @_delay + td
+		dp = @_delay / p
+		tp = td / p
+
+		if parsent > dp
+			@_tween.gotoAndStop((parsent - dp)/tp)
+		else
+			@_tween.gotoAndStop(0)
+		return
+
+	gotoAndPlay:(parsent)->
+		parsent = if parsent > 1 then 1 else if parsent < 0 then 0 else parsent
+		td = @_tween.getDuration() * 1000
+		p = @_delay + td
+		dp = @_delay / p
+		tp = td / p
+
+		if parsent > dp
+			@_tween.gotoAndPlay((parsent - dp)/tp)
+		else
+			@_delay = ((dp - parsent) / dp) * @_delay
+			@play()
+		return

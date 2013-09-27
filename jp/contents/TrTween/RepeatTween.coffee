@@ -7,6 +7,7 @@ class RepeatTween extends ITween
 		@_tween.onComplete(=>
 			@_repeatPlay()
 		)
+		@_duration = @_getDuration()
 	play:->
 		@_state = TweenState.Playing
 		@_tween.play()
@@ -22,6 +23,8 @@ class RepeatTween extends ITween
 		@finalize()
 		return
 	getDuration:->
+		return @_duration
+	_getDuration:->
 		if @_count is 0 then return Infinity
 		else @_tween.getDuration() * @_count
 	finalize:->
@@ -31,3 +34,25 @@ class RepeatTween extends ITween
 		return
 	clone:->
 		return new RepeatTween(@_tween.clone(),@_count)
+	gotoAndStop:(parsent)->
+		if @_count is 0
+			throw new Error("ないよ")
+		parsent = if parsent > 1 then 1 else if parsent < 0 then 0 else parsent
+		tp = @_duration * parsent
+		td = @_tween.getDuration()
+		r  = ~~(tp / td) - 1
+		s  = tp - (r * td)
+		@_ct = r
+		@_tween.gotoAndStop(s/td)
+		return
+	gotoAndPlay:(parsent)->
+		if @_count is 0
+			throw new Error("ないよ")
+		parsent = if parsent > 1 then 1 else if parsent < 0 then 0 else parsent
+		tp = @_duration * parsent
+		td = @_tween.getDuration()
+		r  = ~~(tp / td) - 1
+		s  = tp - (r * td)
+		@_ct = r
+		@_tween.gotoAndPlay(s/td)
+		return

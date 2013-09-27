@@ -20,7 +20,10 @@ class ITween
 		return
 	getState:->
 		return @_state
-
+	gotoAndStop:(parsent)->
+		return
+	gotoAndPlay:(parsent)->
+		return
 class ITweenGroup extends ITween
 	getTweens:->
 		return @_tweens

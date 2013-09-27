@@ -25,9 +25,9 @@ class TrTween
 		return new FuncTween(func,params,caller)
 	@prop:(target,propaties)->
 		return new PropertyTween(target,propaties)
-	@apply:(target,propaties)->
-		return new PropertyTween(target,propaties)
-	@version = "0.1.5"
+	@wait:(time)->
+		return new WaitTween(time)
+	@version = "0.2.1"
 	@DefaultEasing = Linear.easeNone
 	@DefaultCssEasing = CSS3Easing.linear
 
