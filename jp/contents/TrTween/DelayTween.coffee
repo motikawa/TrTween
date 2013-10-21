@@ -17,8 +17,10 @@ class DelayTween extends ITween
 		if @_onPlay
 			@_onPlay(@)
 		return
+
+	update:(ct)->
+		
 	finalize:->
-		# @_tween = null
 		@_state = TweenState.Finalized
 		if @_onComplete
 			@_onComplete(@)
@@ -29,10 +31,7 @@ class DelayTween extends ITween
 			@_tween.stop()
 		return
 	_onTweenComplete:->
-		# tween = @_tween
 		@finalize()
-		# @_tween = tween
-		# console.log(@_tween)
 		return
 	getDuration:->
 		return @_delay / 1000 + @_tween.getDuration()

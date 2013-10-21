@@ -16,13 +16,16 @@ class BasicTween extends ITween
 		return
 	play:->
 		@_state = TweenState.Playing
-		@_c = @_mapper.registerTween(@)
-		@_st = if Date.now? then  Date.now() else new Date().getTime()
-		@_endTime = @_st + @_duration
+		@register(false)
 		if Render.getState() is 0
 			Render.start()
 		if @_onPlay
 			@_onPlay(@)
+		return
+	register:(register)->
+		@_c = @_mapper.registerTween(@,register)
+		@_st = if Date.now? then  Date.now() else new Date().getTime()
+		@_endTime = @_st + @_duration
 		return
 	update:(ct,prop)->
 		

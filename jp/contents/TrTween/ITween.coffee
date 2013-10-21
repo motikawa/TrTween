@@ -24,6 +24,8 @@ class ITween
 		return
 	gotoAndPlay:(parsent)->
 		return
+	slice:(from,to)->
+		return
 class ITweenGroup extends ITween
 	getTweens:->
 		return @_tweens

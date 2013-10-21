@@ -2,7 +2,7 @@
 
   'use strict';
 
-  var APP_BROWSER, APP_OS, AnimationTween, Application, BasicTween, BezierTween, BrowserName, CSS2W, CSS3Easing, DelayTween, Delegate, EasingTween, FSW, FuncTween, ICSSTween, ITween, ITweenGroup, Linear, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Render, RepeatTween, SerialTween, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, isFIE, isIOS, requestAnimationFrame;
+  var APP_BROWSER, APP_OS, AnimationTween, Application, Back, BackEaseIn, BackEaseInOut, BackEaseInOutWith, BackEaseInWith, BackEaseOut, BackEaseOutIn, BackEaseOutInWith, BackEaseOutWith, BasicTween, BezierTween, Bounce, BounceEaseIn, BounceEaseInOut, BounceEaseOut, BounceEaseOutIn, BrowserName, CSS2W, CSS3Easing, Circ, CircEaseIn, CircEaseInOut, CircEaseOut, CircEaseOutIn, Cubic, CubicEaseIn, CubicEaseInOut, CubicEaseOut, CubicEaseOutIn, DelayTween, Delegate, EasingTween, Elastic, ElasticEaseIn, ElasticEaseInOut, ElasticEaseInOutWith, ElasticEaseInWith, ElasticEaseOut, ElasticEaseOutIn, ElasticEaseOutInWith, ElasticEaseOutWith, Expo, ExpoEaseIn, ExpoEaseInOut, ExpoEaseOut, ExpoEaseOutIn, FSW, FuncTween, ICSSTween, IEasing, ITween, ITweenGroup, Linear, LinearEaseNone, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Quad, QuadEaseIn, QuadEaseInOut, QuadEaseOut, QuadEaseOutIn, Quart, QuartEaseIn, QuartEaseInOut, QuartEaseOut, QuartEaseOutIn, Quint, QuintEaseIn, QuintEaseInOut, QuintEaseOut, QuintEaseOutIn, Render, RepeatTween, SerialTween, Sine, SineEaseIn, SineEaseInOut, SineEaseOut, SineEaseOutIn, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, getEasingByString, isFIE, isIOS, requestAnimationFrame;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   BrowserName = {
@@ -192,6 +192,1150 @@
   window.jp.contents.util.Delegate = Delegate;
 
   window.jp.contents.util.Application = Application;
+
+  IEasing = (function() {
+
+    function IEasing() {}
+
+    IEasing.prototype.update = function(t, b, c, d) {};
+
+    return IEasing;
+
+  })();
+
+  LinearEaseNone = (function() {
+
+    __extends(LinearEaseNone, IEasing);
+
+    function LinearEaseNone() {}
+
+    LinearEaseNone.prototype.update = function(t, b, c, d) {
+      return c * t / d + b;
+    };
+
+    return LinearEaseNone;
+
+  })();
+
+  SineEaseOut = (function() {
+
+    __extends(SineEaseOut, IEasing);
+
+    function SineEaseOut() {
+      this._pi = Math.PI * .5;
+    }
+
+    SineEaseOut.prototype.update = function(t, b, c, d) {
+      return c * Math.sin(t / d * this._pi) + b;
+    };
+
+    return SineEaseOut;
+
+  })();
+
+  SineEaseIn = (function() {
+
+    __extends(SineEaseIn, IEasing);
+
+    function SineEaseIn() {
+      this._pi = Math.PI * .5;
+    }
+
+    SineEaseIn.prototype.update = function(t, b, c, d) {
+      return -c * Math.cos(t / d * this._pi) + c + b;
+    };
+
+    return SineEaseIn;
+
+  })();
+
+  SineEaseInOut = (function() {
+
+    __extends(SineEaseInOut, IEasing);
+
+    function SineEaseInOut() {
+      this._pi = Math.PI;
+    }
+
+    SineEaseInOut.prototype.update = function(t, b, c, d) {
+      return -(c / 2) * (Math.cos(this._pi * t / d) - 1) + b;
+    };
+
+    return SineEaseInOut;
+
+  })();
+
+  SineEaseOutIn = (function() {
+
+    __extends(SineEaseOutIn, IEasing);
+
+    function SineEaseOutIn() {
+      this._pi = Math.PI * .5;
+    }
+
+    SineEaseOutIn.prototype.update = function(t, b, c, d) {
+      if (t < (d / 2)) {
+        return (c / 2) * Math.sin((t * 2) / d * this._pi) + b;
+      } else {
+        return -(c / 2) * Math.cos((t * 2 - d) / d * this._pi) + (c / 2) + (b + (c / 2));
+      }
+    };
+
+    return SineEaseOutIn;
+
+  })();
+
+  CubicEaseOut = (function() {
+
+    __extends(CubicEaseOut, IEasing);
+
+    function CubicEaseOut() {}
+
+    CubicEaseOut.prototype.update = function(t, b, c, d) {
+      return c * ((t = t / d - 1) * t * t + 1) + b;
+    };
+
+    return CubicEaseOut;
+
+  })();
+
+  CubicEaseIn = (function() {
+
+    __extends(CubicEaseIn, IEasing);
+
+    function CubicEaseIn() {}
+
+    CubicEaseIn.prototype.update = function(t, b, c, d) {
+      return c * (t /= d) * t * t + b;
+    };
+
+    return CubicEaseIn;
+
+  })();
+
+  CubicEaseInOut = (function() {
+
+    __extends(CubicEaseInOut, IEasing);
+
+    function CubicEaseInOut() {}
+
+    CubicEaseInOut.prototype.update = function(t, b, c, d) {
+      if ((t /= d / 2) < 1) {
+        return (c / 2) * t * t * t + b;
+      } else {
+        return (c / 2) * ((t -= 2) * t * t + 2) + b;
+      }
+    };
+
+    return CubicEaseInOut;
+
+  })();
+
+  CubicEaseOutIn = (function() {
+
+    __extends(CubicEaseOutIn, IEasing);
+
+    function CubicEaseOutIn() {}
+
+    CubicEaseOutIn.prototype.update = function(t, b, c, d) {
+      if (t < d / 2) {
+        return c / 2 * ((t = t * 2 / d - 1) * t * t + 1) + b;
+      } else {
+        return c / 2 * (t = (t * 2 - d) / d) * t * t + b + c / 2;
+      }
+    };
+
+    return CubicEaseOutIn;
+
+  })();
+
+  QuintEaseOut = (function() {
+
+    __extends(QuintEaseOut, IEasing);
+
+    function QuintEaseOut() {}
+
+    QuintEaseOut.prototype.update = function(t, b, c, d) {
+      return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
+    };
+
+    return QuintEaseOut;
+
+  })();
+
+  QuintEaseIn = (function() {
+
+    __extends(QuintEaseIn, IEasing);
+
+    function QuintEaseIn() {}
+
+    QuintEaseIn.prototype.update = function(t, b, c, d) {
+      return c * (t /= d) * t * t * t * t + b;
+    };
+
+    return QuintEaseIn;
+
+  })();
+
+  QuintEaseInOut = (function() {
+
+    __extends(QuintEaseInOut, IEasing);
+
+    function QuintEaseInOut() {}
+
+    QuintEaseInOut.prototype.update = function(t, b, c, d) {
+      if ((t /= d / 2) < 1) {
+        return c / 2 * t * t * t * t * t + b;
+      } else {
+        return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+      }
+    };
+
+    return QuintEaseInOut;
+
+  })();
+
+  QuintEaseOutIn = (function() {
+
+    __extends(QuintEaseOutIn, IEasing);
+
+    function QuintEaseOutIn() {}
+
+    QuintEaseOutIn.prototype.update = function(t, b, c, d) {
+      if (t < d / 2) {
+        return (c / 2) * ((t = (t * 2) / d - 1) * t * t * t * t + 1) + b;
+      } else {
+        return (c / 2) * (t = (t * 2 - d) / d) * t * t * t * t + (b + c / 2);
+      }
+    };
+
+    return QuintEaseOutIn;
+
+  })();
+
+  CircEaseOut = (function() {
+
+    __extends(CircEaseOut, IEasing);
+
+    function CircEaseOut() {}
+
+    CircEaseOut.prototype.update = function(t, b, c, d) {
+      return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
+    };
+
+    return CircEaseOut;
+
+  })();
+
+  CircEaseIn = (function() {
+
+    __extends(CircEaseIn, IEasing);
+
+    function CircEaseIn() {}
+
+    CircEaseIn.prototype.update = function(t, b, c, d) {
+      return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
+    };
+
+    return CircEaseIn;
+
+  })();
+
+  CircEaseInOut = (function() {
+
+    __extends(CircEaseInOut, IEasing);
+
+    function CircEaseInOut() {}
+
+    CircEaseInOut.prototype.update = function(t, b, c, d) {
+      if ((t /= d / 2) < 1) {
+        return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
+      } else {
+        return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
+      }
+    };
+
+    return CircEaseInOut;
+
+  })();
+
+  CircEaseOutIn = (function() {
+
+    __extends(CircEaseOutIn, IEasing);
+
+    function CircEaseOutIn() {}
+
+    CircEaseOutIn.prototype.update = function(t, b, c, d) {
+      if (t < d / 2) {
+        return (c / 2) * Math.sqrt(1 - (t = (t * 2) / d - 1) * t) + b;
+      } else {
+        return -(c / 2) * (Math.sqrt(1 - (t = (t * 2 - d) / d) * t) - 1) + (b + c / 2);
+      }
+    };
+
+    return CircEaseOutIn;
+
+  })();
+
+  QuadEaseOut = (function() {
+
+    __extends(QuadEaseOut, IEasing);
+
+    function QuadEaseOut() {}
+
+    QuadEaseOut.prototype.update = function(t, b, c, d) {
+      return -c * (t /= d) * (t - 2) + b;
+    };
+
+    return QuadEaseOut;
+
+  })();
+
+  QuadEaseIn = (function() {
+
+    __extends(QuadEaseIn, IEasing);
+
+    function QuadEaseIn() {}
+
+    QuadEaseIn.prototype.update = function(t, b, c, d) {
+      return c * (t /= d) * t + b;
+    };
+
+    return QuadEaseIn;
+
+  })();
+
+  QuadEaseInOut = (function() {
+
+    __extends(QuadEaseInOut, IEasing);
+
+    function QuadEaseInOut() {}
+
+    QuadEaseInOut.prototype.update = function(t, b, c, d) {
+      if ((t /= d / 2) < 1) {
+        return c / 2 * t * t + b;
+      } else {
+        return -c / 2 * ((--t) * (t - 2) - 1) + b;
+      }
+    };
+
+    return QuadEaseInOut;
+
+  })();
+
+  QuadEaseOutIn = (function() {
+
+    __extends(QuadEaseOutIn, IEasing);
+
+    function QuadEaseOutIn() {}
+
+    QuadEaseOutIn.prototype.update = function(t, b, c, d) {
+      if (t < d / 2) {
+        return -(c / 2) * (t = t * 2 / d) * (t - 2) + b;
+      } else {
+        return (c / 2) * (t = (t * 2 - d) / d) * t + (b + c / 2);
+      }
+    };
+
+    return QuadEaseOutIn;
+
+  })();
+
+  QuartEaseOut = (function() {
+
+    __extends(QuartEaseOut, IEasing);
+
+    function QuartEaseOut() {}
+
+    QuartEaseOut.prototype.update = function(t, b, c, d) {
+      return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+    };
+
+    return QuartEaseOut;
+
+  })();
+
+  QuartEaseIn = (function() {
+
+    __extends(QuartEaseIn, IEasing);
+
+    function QuartEaseIn() {}
+
+    QuartEaseIn.prototype.update = function(t, b, c, d) {
+      return c * (t /= d) * t * t * t + b;
+    };
+
+    return QuartEaseIn;
+
+  })();
+
+  QuartEaseInOut = (function() {
+
+    __extends(QuartEaseInOut, IEasing);
+
+    function QuartEaseInOut() {}
+
+    QuartEaseInOut.prototype.update = function(t, b, c, d) {
+      if ((t /= d / 2) < 1) {
+        return c / 2 * t * t * t * t + b;
+      } else {
+        return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+      }
+    };
+
+    return QuartEaseInOut;
+
+  })();
+
+  QuartEaseOutIn = (function() {
+
+    __extends(QuartEaseOutIn, IEasing);
+
+    function QuartEaseOutIn() {}
+
+    QuartEaseOutIn.prototype.update = function(t, b, c, d) {
+      if ((t /= d / 2) < 1) {
+        return c / 2 * t * t * t * t + b;
+      } else {
+        return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+      }
+    };
+
+    return QuartEaseOutIn;
+
+  })();
+
+  ExpoEaseOut = (function() {
+
+    __extends(ExpoEaseOut, IEasing);
+
+    function ExpoEaseOut() {}
+
+    ExpoEaseOut.prototype.update = function(t, b, c, d) {
+      if (t === d) {
+        return b + c;
+      } else {
+        return c * (-Math.pow(2, -10 * t / d) + 1) + b;
+      }
+    };
+
+    return ExpoEaseOut;
+
+  })();
+
+  ExpoEaseIn = (function() {
+
+    __extends(ExpoEaseIn, IEasing);
+
+    function ExpoEaseIn() {}
+
+    ExpoEaseIn.prototype.update = function(t, b, c, d) {
+      if (t === 0) {
+        return b;
+      } else {
+        return c * Math.pow(2, 10 * (t / d - 1)) + b;
+      }
+    };
+
+    return ExpoEaseIn;
+
+  })();
+
+  ExpoEaseInOut = (function() {
+
+    __extends(ExpoEaseInOut, IEasing);
+
+    function ExpoEaseInOut() {}
+
+    ExpoEaseInOut.prototype.update = function(t, b, c, d) {
+      if (t === 0) {
+        return b;
+      } else if (t === d) {
+        return b + c;
+      } else if ((t /= d / 2) < 1) {
+        return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
+      } else {
+        return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
+      }
+    };
+
+    return ExpoEaseInOut;
+
+  })();
+
+  ExpoEaseOutIn = (function() {
+
+    __extends(ExpoEaseOutIn, IEasing);
+
+    function ExpoEaseOutIn() {}
+
+    ExpoEaseOutIn.prototype.update = function(t, b, c, d) {
+      if (t < d / 2) {
+        if (t * 2 === d) {
+          return b + c / 2;
+        } else {
+          return c / 2 * (1 - Math.pow(2, -10 * t * 2 / d)) + b;
+        }
+      } else if (t * 2 - d === 0) {
+        return b + c / 2;
+      } else {
+        return c / 2 * Math.pow(2, 10 * ((t * 2 - d) / d - 1)) + b + c / 2;
+      }
+    };
+
+    return ExpoEaseOutIn;
+
+  })();
+
+  ElasticEaseOutWith = (function() {
+
+    __extends(ElasticEaseOutWith, IEasing);
+
+    function ElasticEaseOutWith(amplitude, period) {
+      this.a = amplitude;
+      this.p = period;
+      this.pi = Math.PI;
+    }
+
+    ElasticEaseOutWith.prototype.update = function(t, b, c, d) {
+      var s;
+      if (t === 0) {
+        return b;
+      } else if ((t /= d) === 1) {
+        return b + c;
+      }
+      if (!this.p) this.p = d * 0.3;
+      if (!this.a || this.a < Math.abs(c)) {
+        this.a = c;
+        s = this.p / 4;
+      } else {
+        s = this.p / (2 * this.pi) * Math.asin(c / this.a);
+      }
+      return this.a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * this.pi) / this.p) + c + b;
+    };
+
+    return ElasticEaseOutWith;
+
+  })();
+
+  ElasticEaseInWith = (function() {
+
+    __extends(ElasticEaseInWith, IEasing);
+
+    function ElasticEaseInWith(amplitude, period) {
+      this.a = amplitude;
+      this.p = period;
+      this.pi = Math.PI;
+    }
+
+    ElasticEaseInWith.prototype.update = function(t, b, c, d) {
+      var s;
+      if (t === 0) {
+        return b;
+      } else if ((t /= d) === 1) {
+        return b + c;
+      }
+      if (!this.p) this.p = d * 0.3;
+      if (!this.a || this.a < Math.abs(c)) {
+        this.a = c;
+        s = this.p / 4;
+      } else {
+        s = this.p / (2 * Math.PI) * Math.asin(c / this.a);
+      }
+      return -(this.a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * this.pi) / this.p)) + b;
+    };
+
+    return ElasticEaseInWith;
+
+  })();
+
+  ElasticEaseInOutWith = (function() {
+
+    __extends(ElasticEaseInOutWith, IEasing);
+
+    function ElasticEaseInOutWith(amplitude, period) {
+      this.a = amplitude;
+      this.p = period;
+      this.pi = Math.PI;
+    }
+
+    ElasticEaseInOutWith.prototype.update = function(t, b, c, d) {
+      var s;
+      if (t === 0) {
+        return b;
+      } else if ((t /= d / 2) === 2) {
+        return b + c;
+      }
+      if (!this.p) this.p = d * (0.3 * 1.5);
+      if (!this.a || this.a < Math.abs(c)) {
+        this.a = c;
+        s = this.p / 4;
+      } else {
+        s = this.p / (2 * this.pi) * Math.asin(c / this.a);
+      }
+      if (t < 1) {
+        return -0.5 * (this.a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * this.pi) / this.p)) + b;
+      } else {
+        return this.a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * this.pi) / this.p) * 0.5 + c + b;
+      }
+    };
+
+    return ElasticEaseInOutWith;
+
+  })();
+
+  ElasticEaseOutInWith = (function() {
+
+    __extends(ElasticEaseOutInWith, IEasing);
+
+    function ElasticEaseOutInWith(amplitude, period) {
+      this.a = amplitude;
+      this.p = period;
+      this.pi = Math.PI;
+    }
+
+    ElasticEaseOutInWith.prototype.update = function(t, b, c, d) {
+      var s;
+      c /= 2;
+      if (t < d / 2) {
+        if ((t *= 2) === 0) return b;
+        if ((t /= d) === 1) return b + c;
+        if (!this.p) this.p = d * 0.3;
+        if (!this.a || this.a < Math.abs(c)) {
+          this.a = c;
+          s = this.p / 4;
+        } else {
+          s = this.p / (2 * this.pi) * Math.asin(c / this.a);
+        }
+        return this.a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * this.pi) / this.p) + c + b;
+      } else {
+        if ((t = t * 2 - d) === 0) {
+          return b + c;
+        } else if ((t /= d) === 1) {
+          return (b + c) + c;
+        }
+        if (!this.p) this.p = d * 0.3;
+        if (!this.a || this.a < Math.abs(c)) {
+          this.a = c;
+          s = this.p / 4;
+        } else {
+          s = this.p / (2 * this.pi) * Math.asin(c / this.a);
+        }
+        return -(this.a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * this.pi) / this.p)) + (b + c);
+      }
+    };
+
+    return ElasticEaseOutInWith;
+
+  })();
+
+  ElasticEaseOut = (function() {
+
+    __extends(ElasticEaseOut, ElasticEaseOutWith);
+
+    function ElasticEaseOut() {
+      ElasticEaseOut.__super__.constructor.call(this, 0, 0);
+    }
+
+    return ElasticEaseOut;
+
+  })();
+
+  ElasticEaseIn = (function() {
+
+    __extends(ElasticEaseIn, ElasticEaseInWith);
+
+    function ElasticEaseIn() {
+      ElasticEaseIn.__super__.constructor.call(this, 0, 0);
+    }
+
+    return ElasticEaseIn;
+
+  })();
+
+  ElasticEaseOutIn = (function() {
+
+    __extends(ElasticEaseOutIn, ElasticEaseOutInWith);
+
+    function ElasticEaseOutIn() {
+      ElasticEaseOutIn.__super__.constructor.call(this, 0, 0);
+    }
+
+    return ElasticEaseOutIn;
+
+  })();
+
+  ElasticEaseInOut = (function() {
+
+    __extends(ElasticEaseInOut, ElasticEaseInOutWith);
+
+    function ElasticEaseInOut() {
+      ElasticEaseInOut.__super__.constructor.call(this, 0, 0);
+    }
+
+    return ElasticEaseInOut;
+
+  })();
+
+  BackEaseOutWith = (function() {
+
+    __extends(BackEaseOutWith, IEasing);
+
+    function BackEaseOutWith(s) {
+      this.s = s;
+    }
+
+    BackEaseOutWith.prototype.update = function(t, b, c, d) {
+      var s;
+      s = this.s;
+      return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+    };
+
+    return BackEaseOutWith;
+
+  })();
+
+  BackEaseInWith = (function() {
+
+    __extends(BackEaseInWith, IEasing);
+
+    function BackEaseInWith(s) {
+      this.s = s;
+    }
+
+    BackEaseInWith.prototype.update = function(t, b, c, d) {
+      var s;
+      s = this.s;
+      return c * (t /= d) * t * ((s + 1) * t - s) + b;
+    };
+
+    return BackEaseInWith;
+
+  })();
+
+  BackEaseInOutWith = (function() {
+
+    __extends(BackEaseInOutWith, IEasing);
+
+    function BackEaseInOutWith(s) {
+      this.s = s;
+    }
+
+    BackEaseInOutWith.prototype.update = function(t, b, c, d) {
+      var s;
+      s = this.s;
+      if ((t /= d / 2) < 1) {
+        return c / 2 * (t * t * (((s * 1.525) + 1) * t - s * 1.525)) + b;
+      } else {
+        return c / 2 * ((t -= 2) * t * (((s * 1.525) + 1) * t + s * 1.525) + 2) + b;
+      }
+    };
+
+    return BackEaseInOutWith;
+
+  })();
+
+  BackEaseOutInWith = (function() {
+
+    __extends(BackEaseOutInWith, IEasing);
+
+    function BackEaseOutInWith(s) {
+      this.s = s;
+    }
+
+    BackEaseOutInWith.prototype.update = function(t, b, c, d) {
+      var s;
+      s = this.s;
+      if (t < d / 2) {
+        return (c / 2) * ((t = (t * 2) / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+      } else {
+        return (c / 2) * (t = (t * 2 - d) / d) * t * ((s + 1) * t - s) + (b + c / 2);
+      }
+    };
+
+    return BackEaseOutInWith;
+
+  })();
+
+  BackEaseOut = (function() {
+
+    __extends(BackEaseOut, BackEaseOutWith);
+
+    function BackEaseOut() {
+      BackEaseOut.__super__.constructor.call(this, 1.70158);
+    }
+
+    return BackEaseOut;
+
+  })();
+
+  BackEaseIn = (function() {
+
+    __extends(BackEaseIn, BackEaseInWith);
+
+    function BackEaseIn() {
+      BackEaseIn.__super__.constructor.call(this, 1.70158);
+    }
+
+    return BackEaseIn;
+
+  })();
+
+  BackEaseInOut = (function() {
+
+    __extends(BackEaseInOut, BackEaseInOutWith);
+
+    function BackEaseInOut() {
+      BackEaseInOut.__super__.constructor.call(this, 1.70158);
+    }
+
+    return BackEaseInOut;
+
+  })();
+
+  BackEaseOutIn = (function() {
+
+    __extends(BackEaseOutIn, BackEaseOutInWith);
+
+    function BackEaseOutIn() {
+      BackEaseOutIn.__super__.constructor.call(this, 1.70158);
+    }
+
+    return BackEaseOutIn;
+
+  })();
+
+  BounceEaseOut = (function() {
+
+    __extends(BounceEaseOut, IEasing);
+
+    function BounceEaseOut() {}
+
+    BounceEaseOut.prototype.update = function(t, b, c, d) {
+      if ((t /= d) < (1 / 2.75)) {
+        return c * (7.5625 * t * t) + b;
+      } else if (t < (2 / 2.75)) {
+        return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;
+      } else if (t < (2.5 / 2.75)) {
+        return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;
+      } else {
+        return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
+      }
+    };
+
+    return BounceEaseOut;
+
+  })();
+
+  BounceEaseIn = (function() {
+
+    __extends(BounceEaseIn, IEasing);
+
+    function BounceEaseIn() {}
+
+    BounceEaseIn.prototype.update = function(t, b, c, d) {
+      if ((t = (d - t) / d) < (1 / 2.75)) {
+        return c - (c * (7.5625 * t * t)) + b;
+      } else if (t < (2 / 2.75)) {
+        return c - (c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75)) + b;
+      } else if (t < (2.5 / 2.75)) {
+        return c - (c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375)) + b;
+      } else {
+        return c - (c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375)) + b;
+      }
+    };
+
+    return BounceEaseIn;
+
+  })();
+
+  BounceEaseInOut = (function() {
+
+    __extends(BounceEaseInOut, IEasing);
+
+    function BounceEaseInOut() {}
+
+    BounceEaseInOut.prototype.update = function(t, b, c, d) {
+      if (t < d / 2) {
+        if ((t = (d - t * 2) / d) < (1 / 2.75)) {
+          return (c - (c * (7.5625 * t * t))) * 0.5 + b;
+        } else if (t < (2 / 2.75)) {
+          return (c - (c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75))) * 0.5 + b;
+        } else if (t < (2.5 / 2.75)) {
+          return (c - (c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375))) * 0.5 + b;
+        } else {
+          return (c - (c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375))) * 0.5 + b;
+        }
+      } else {
+        if ((t = (t * 2 - d) / d) < (1 / 2.75)) {
+          return (c * (7.5625 * t * t)) * 0.5 + c * 0.5 + b;
+        } else if (t < (2 / 2.75)) {
+          return (c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75)) * 0.5 + c * 0.5 + b;
+        } else if (t < (2.5 / 2.75)) {
+          return (c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375)) * 0.5 + c * 0.5 + b;
+        } else {
+          return (c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375)) * 0.5 + c * 0.5 + b;
+        }
+      }
+    };
+
+    return BounceEaseInOut;
+
+  })();
+
+  BounceEaseOutIn = (function() {
+
+    __extends(BounceEaseOutIn, IEasing);
+
+    function BounceEaseOutIn() {}
+
+    BounceEaseOutIn.prototype.update = function(t, b, c, d) {
+      if (t < d / 2) {
+        if ((t = (t * 2) / d) < (1 / 2.75)) {
+          return (c / 2) * (7.5625 * t * t) + b;
+        } else if (t < (2 / 2.75)) {
+          return (c / 2) * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;
+        } else if (t < (2.5 / 2.75)) {
+          return (c / 2) * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;
+        } else {
+          return (c / 2) * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
+        }
+      } else {
+        if ((t = (d - (t * 2 - d)) / d) < (1 / 2.75)) {
+          return (c / 2) - ((c / 2) * (7.5625 * t * t)) + (b + c / 2);
+        } else if (t < (2 / 2.75)) {
+          return (c / 2) - ((c / 2) * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75)) + (b + c / 2);
+        } else if (t < (2.5 / 2.75)) {
+          return (c / 2) - ((c / 2) * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375)) + (b + c / 2);
+        } else {
+          return (c / 2) - ((c / 2) * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375)) + (b + c / 2);
+        }
+      }
+    };
+
+    return BounceEaseOutIn;
+
+  })();
+
+  Linear = {
+    easeNone: new LinearEaseNone(),
+    easeOut: new LinearEaseNone(),
+    easeIn: new LinearEaseNone(),
+    easeOutIn: new LinearEaseNone(),
+    easeInOut: new LinearEaseNone()
+  };
+
+  Sine = {
+    easeOut: new SineEaseOut(),
+    easeIn: new SineEaseIn(),
+    easeOutIn: new SineEaseOutIn(),
+    easeInOut: new SineEaseInOut()
+  };
+
+  Cubic = {
+    easeOut: new CubicEaseOut(),
+    easeIn: new CubicEaseIn(),
+    easeOutIn: new CubicEaseOutIn(),
+    easeInOut: new CubicEaseInOut()
+  };
+
+  Quint = {
+    easeOut: new QuintEaseOut(),
+    easeIn: new QuintEaseIn(),
+    easeOutIn: new QuintEaseOutIn(),
+    easeInOut: new QuintEaseInOut()
+  };
+
+  Circ = {
+    easeOut: new CircEaseOut(),
+    easeIn: new CircEaseIn(),
+    easeOutIn: new CircEaseOutIn(),
+    easeInOut: new CircEaseInOut()
+  };
+
+  Quad = {
+    easeOut: new QuadEaseOut(),
+    easeIn: new QuadEaseIn(),
+    easeOutIn: new QuadEaseOutIn(),
+    easeInOut: new QuadEaseInOut()
+  };
+
+  Quart = {
+    easeOut: new QuartEaseOut(),
+    easeIn: new QuartEaseIn(),
+    easeOutIn: new QuartEaseOutIn(),
+    easeInOut: new QuartEaseInOut()
+  };
+
+  Expo = {
+    easeOut: new ExpoEaseOut(),
+    easeIn: new ExpoEaseIn(),
+    easeOutIn: new ExpoEaseOutIn(),
+    easeInOut: new ExpoEaseInOut()
+  };
+
+  Elastic = {
+    easeOut: new ElasticEaseOut(),
+    easeIn: new ElasticEaseIn(),
+    easeOutIn: new ElasticEaseOutIn(),
+    easeInOut: new ElasticEaseInOut(),
+    easeOutWith: function(a, b) {
+      return new ElasticEaseOutWith(a, b);
+    },
+    easeInWith: function(a, b) {
+      return new ElasticEaseInWith(a, b);
+    },
+    easeInOutWith: function(a, b) {
+      return new ElasticEaseInOutWith(a, b);
+    },
+    easeOutInWith: function(a, b) {
+      return new ElasticEaseOutInWith(a, b);
+    }
+  };
+
+  Back = {
+    easeOut: new BackEaseOut(),
+    easeIn: new BackEaseIn(),
+    easeOutIn: new BackEaseOutIn(),
+    easeInOut: new BackEaseInOut(),
+    easeOutWith: function(s) {
+      return new BackEaseOutWith(s);
+    },
+    easeInWith: function(s) {
+      return new BackEaseInWith(s);
+    },
+    easeInOutWith: function(s) {
+      return new BackEaseInOutWith(s);
+    },
+    easeOutInWith: function(s) {
+      return new BackEaseOutInWith(s);
+    }
+  };
+
+  Bounce = {
+    easeOut: new BounceEaseOut(),
+    easeIn: new BounceEaseIn(),
+    easeOutIn: new BounceEaseOutIn(),
+    easeInOut: new BounceEaseInOut()
+  };
+
+  CSS3Easing = {
+    linear: "cubic-bezier(0.250, 0.250, 0.750, 0.750)",
+    ease: "cubic-bezier(0.250, 0.100, 0.250, 1.000)",
+    easeIn: "cubic-bezier(0.420, 0.000, 1.000, 1.000)",
+    easeOut: "cubic-bezier(0.000, 0.000, 0.580, 1.000)",
+    easeInBack: "cubic-bezier(0.600, -0.280, 0.735, 0.045)",
+    easeInOutBack: "cubic-bezier(0.680, -0.550, 0.265, 1.550)",
+    easeInOut: "cubic-bezier(0.420, 0.000, 0.580, 1.000)",
+    easeInQuad: "cubic-bezier(0.550, 0.085, 0.680, 0.530)",
+    easeInCubic: "cubic-bezier(0.550, 0.055, 0.675, 0.190)",
+    easeInQuart: "cubic-bezier(0.895, 0.030, 0.685, 0.220)",
+    easeInQuint: "cubic-bezier(0.755, 0.050, 0.855, 0.060)",
+    easeInSine: "cubic-bezier(0.470, 0.000, 0.745, 0.715)",
+    easeInExpo: "cubic-bezier(0.950, 0.050, 0.795, 0.035)",
+    easeInCirc: "cubic-bezier(0.600, 0.040, 0.980, 0.335)",
+    easeOutQuad: "cubic-bezier(0.250, 0.460, 0.450, 0.940)",
+    easeOutCubic: "cubic-bezier(0.215, 0.610, 0.355, 1.000)",
+    easeOutQuart: "cubic-bezier(0.165, 0.840, 0.440, 1.000)",
+    easeOutQuint: "cubic-bezier(0.230, 1.000, 0.320, 1.000)",
+    easeOutSine: "cubic-bezier(0.390, 0.575, 0.565, 1.000)",
+    easeOutExpo: "cubic-bezier(0.190, 1.000, 0.220, 1.000)",
+    easeOutCirc: "cubic-bezier(0.075, 0.820, 0.165, 1.000)",
+    easeOutBack: "cubic-bezier(0.175, 0.885, 0.320, 1.275)",
+    easeInOutQuad: "cubic-bezier(0.455, 0.030, 0.515, 0.955)",
+    easeInOutCubic: "cubic-bezier(0.645, 0.045, 0.355, 1.000)",
+    easeInOutQuart: "cubic-bezier(0.770, 0.000, 0.175, 1.000)",
+    easeInOutQuint: "cubic-bezier(0.860, 0.000, 0.070, 1.000)",
+    easeInOutSine: "cubic-bezier(0.445, 0.050, 0.550, 0.950)",
+    easeInOutExpo: "cubic-bezier(1.000, 0.000, 0.000, 1.000)",
+    easeInOutCirc: "cubic-bezier(0.785, 0.135, 0.150, 0.860)"
+  };
+
+  getEasingByString = function(easingName) {
+    if (easingName === "linear") {
+      return Linear.easeNone;
+    } else if (easingName === "easeInBack") {
+      return Back.easeIn;
+    } else if (easingName === "easeInOutBack") {
+      return Back.easeInOut;
+    } else if (easingName === "easeInQuad") {
+      return Quad.easeIn;
+    } else if (easingName === "easeInCubic") {
+      return Cubic.easeIn;
+    } else if (easingName === "easeInQuart") {
+      return Quart.easeIn;
+    } else if (easingName === "easeInQuint") {
+      return Quint.easeIn;
+    } else if (easingName === "easeInSine") {
+      return Sine.easeIn;
+    } else if (easingName === "easeInExpo") {
+      return Expo.easeIn;
+    } else if (easingName === "easeInCirc") {
+      return Circ.easeOut;
+    } else if (easingName === "easeOutQuad") {
+      return Quad.easeOut;
+    } else if (easingName === "easeOutCubic") {
+      return Cubic.easeOut;
+    } else if (easingName === "easeOutQuart") {
+      return Quart.easeOut;
+    } else if (easingName === "easeOutQuint") {
+      return Quint.easeOut;
+    } else if (easingName === "easeOutSine") {
+      return Sine.easeOut;
+    } else if (easingName === "easeOutExpo") {
+      return Expo.easeOut;
+    } else if (easingName === "easeOutCirc") {
+      return Circ.easeOut;
+    } else if (easingName === "easeOutBack") {
+      return Back.easeInOut;
+    } else if (easingName === "easeInOutQuad") {
+      return Quad.easeInOut;
+    } else if (easingName === "easeInOutCubic") {
+      return Cubic.easeInOut;
+    } else if (easingName === "easeInOutQuart") {
+      return Quart.easeInOut;
+    } else if (easingName === "easeInOutQuint") {
+      return Quint.easeInOut;
+    } else if (easingName === "easeInOutSine") {
+      return Sine.easeInOut;
+    } else if (easingName === "easeInOutExpo") {
+      return Expo.easeInOut;
+    } else if (easingName === "easeInOutCirc") {
+      return Circ.easeInOut;
+    }
+  };
+
+  window.jp = window.jp || {};
+
+  window.jp.contents = window.jp.contents || {};
+
+  window.jp.contents.easing = window.jp.contents.easing || {};
+
+  window.jp.contents.easing.Linear = Linear;
+
+  window.jp.contents.easing.Sine = Sine;
+
+  window.jp.contents.easing.Cubic = Cubic;
+
+  window.jp.contents.easing.Quint = Quint;
+
+  window.jp.contents.easing.Circ = Circ;
+
+  window.jp.contents.easing.Back = Back;
+
+  window.jp.contents.easing.Quad = Quad;
+
+  window.jp.contents.easing.Quart = Quart;
+
+  window.jp.contents.easing.Expo = Expo;
+
+  window.jp.contents.easing.Elastic = Elastic;
+
+  window.jp.contents.easing.Bounce = Bounce;
+
+  window.jp.contents.easing.CSS3Easing = CSS3Easing;
+
+  window.jp.contents.easing.getEasingByString = getEasingByString;
 
   'use strict';
 
@@ -1447,6 +2591,8 @@
 
     ITween.prototype.gotoAndPlay = function(parsent) {};
 
+    ITween.prototype.slice = function(from, to) {};
+
     return ITween;
 
   })();
@@ -1509,11 +2655,15 @@
 
     BasicTween.prototype.play = function() {
       this._state = TweenState.Playing;
-      this._c = this._mapper.registerTween(this);
-      this._st = Date.now != null ? Date.now() : new Date().getTime();
-      this._endTime = this._st + this._duration;
+      this.register(false);
       if (Render.getState() === 0) Render.start();
       if (this._onPlay) this._onPlay(this);
+    };
+
+    BasicTween.prototype.register = function(register) {
+      this._c = this._mapper.registerTween(this, register);
+      this._st = Date.now != null ? Date.now() : new Date().getTime();
+      this._endTime = this._st + this._duration;
     };
 
     BasicTween.prototype.update = function(ct, prop) {
@@ -1622,6 +2772,8 @@
       }, this._delay);
       if (this._onPlay) this._onPlay(this);
     };
+
+    DelayTween.prototype.update = function(ct) {};
 
     DelayTween.prototype.finalize = function() {
       this._state = TweenState.Finalized;

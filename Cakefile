@@ -22,6 +22,7 @@ project_files = [
 	dir:"./jp/contents/TrTween/",
 	order:[
 		"../util/Application.coffee",
+		"Easing.coffee",
 		"TrTweenCore.coffee",
 		"LinkedList.coffee",
 		"Render.coffee",

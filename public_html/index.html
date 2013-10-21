@@ -10,98 +10,121 @@
 				margin:0 auto;
 				background: #f1f1f1;
 			}*/
-			.box{
-				width: 100px;height: 100px;
-				background: #fff;				
-				text-align: center;
-				line-height: 36px;
-				font-size: 10px;
-				margin-bottom: 10px;
-				border-radius: 20px;
+			.boxcon{
+				width: 100%;height: 600px;
+				-webkit-perspective: 300px;
 			}
-			
+			.boxinner{
+				position: absolute;
+				top:0;left: 0;
+				width: 200px;height: 200px;
+				background: #fff;
+				border-radius: 20px;
+				-webkit-perspective: 0px;
+			}
+			.box{
+				position: absolute;
+				/*bottom: 0;left:50%;*/
+				width: 200px;height: 200px;
+				/*margin-left: -100px;*/
+			}
+			input[type=range]{
+				width: 500px;
+				margin: 0 auto;
+			}
 
 		</style>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script type="text/javascript" src="easings.js"></script>
+		
 		<script type="text/javascript" src="TrTween.js"></script>
+
 		<script type="text/javascript">
-			var Sine    = jp.contents.easing.Sine,
-				Linear    = jp.contents.easing.Linear,
-				Quart   = jp.contents.easing.Quart,
-				Expo    = jp.contents.easing.Expo,
-				Bounce  = jp.contents.easing.Bounce,
-				TrTween = jp.contents.TrTween.TrTween;
-			
+			var TrTween = jp.contents.TrTween.TrTween,
+				Linear = jp.contents.easing.Linear,
+				Sine = jp.contents.easing.Sine,
+				Cubic = jp.contents.easing.Cubic,
+				Quint = jp.contents.easing.Quint,
+				Circ = jp.contents.easing.Circ,
+				Quad = jp.contents.easing.Quad,
+				Quart = jp.contents.easing.Quart,
+				Expo = jp.contents.easing.Expo,
+				Elastic = jp.contents.easing.Elastic,
+				Back = jp.contents.easing.Back,
+				Bounce = jp.contents.easing.Bounce,
+				easings = {
+					"Linear":Linear.easeNone,
+					"easeOutSine":Sine.easeOut,
+					"easeInSine":Sine.easeIn,
+					"easeInOutSine":Sine.easeInOut,
+					"easeOutInSine":Sine.easeOutIn,
+					"easeOutCubic":Cubic.easeOut,
+					"easeInCubic":Cubic.easeIn,
+					"easeInOutCubic":Cubic.easeInOut,
+					"easeOutInCubic":Cubic.easeOutIn,
+					"easeOutQuint":Quint.easeOut,
+					"easeInQuint":Quint.easeIn,
+					"easeInOutQuint":Quint.easeInOut,
+					"easeOutInQuint":Quint.easeOutIn,
+					"easeOutCirc":Circ.easeOut,
+					"easeInCirc":Circ.easeIn,
+					"easeInOutCirc":Circ.easeInOut,
+					"easeOutInCirc":Circ.easeOutIn,
+					"easeOutQuad":Quad.easeOut,
+					"easeInQuad":Quad.easeIn,
+					"easeInOutQuad":Quad.easeInOut,
+					"easeOutInQuad":Quad.easeOutIn,
+					"easeOutQuart":Quart.easeOut,
+					"easeInQuart":Quart.easeIn,
+					"easeInOutQuart":Quart.easeInOut,
+					"easeOutInQuart":Quart.easeOutIn,
+					"easeOutExpo":Expo.easeOut,
+					"easeInExpo":Expo.easeIn,
+					"easeInOutExpo":Expo.easeInOut,
+					"easeOutInExpo":Expo.easeOutIn,
+					"easeOutElastic":Elastic.easeOut,
+					"easeInElastic":Elastic.easeIn,
+					"easeInOutElastic":Elastic.easeInOut,
+					"easeOutInElastic":Elastic.easeOutIn,
+					"easeOutBack":Back.easeOut,
+					"easeInBack":Back.easeIn,
+					"easeInOutBack":Back.easeInOut,
+					"easeOutInBack":Back.easeOutIn,
+					"easeOutBounce":Bounce.easeOut,
+					"easeInBounce":Bounce.easeIn,
+					"easeInOutBounce":Bounce.easeInOut,
+					"easeOutInBounce":Bounce.easeOutIn
+				};
 			$(document).ready(function(){
-				var tt = TrTween.repeat(TrTween.tween($("#normalTween .box")[0],{x:100},null,1),5);
-				tt.gotoAndPlay(.7);
-				$("#nplay").click(function()
+				var name,appendstr = "",box = $("#wrapper .boxinner")[0];
+				for (name in easings)
 				{
-					var b = $("#normalTween .box");
-					var tweens = [];
-					var step = 0;
-
-					var i = 0;len = b.length;
-					for(i = 0;i < len; i++)
-					{
-						tweens[i] = TrTween.delay(TrTween.bezier(b[i],{x:800,y:0},{x:0,y:0},{x:200,y:100 + i * 20},1,Quart.easeOut),0);
-					}
-					var tr = TrTween.easingTweens(tweens,Expo.easeInOut,5);
-
-					console.log(tr.getDuration());
-					// setInterval(function(){
-					// 	step += .01;
-						
-					// },500);
-					$(window).scroll(function(){
-					var st = $("body").scrollTop(),
-						bh = $("html").height(),
-						wh = window.innerHeight,
-						d = bh - wh;
-						tr.gotoAndStop(st/d);	
-						// console.log(d);
-					});	
-				
+					appendstr += "<option value='" + name + "'>" + name + "</option>";
+				}
+				$("#selectEasing").append(appendstr).bind("change",function(){
+					var easing = easings[this.value];
+					console.log(easing);
+					TrTween.tween(box,{x:600},{x:0},1.5,easing).play();
 				})
-
-
-
-
-
 			});
+
+			
 			
 		</script>
 	</head>
 	<body>
 		<section id="wrapper">
-		<figure id="normalTween">
-			<ul class="clearfix">
-			<li><input id="nplay" type='button' value="play" name="play" /></li>
-			<li><input type='button' value="stop" name="stop" /></li>
-			</ul>
-			<figcaption>■Normal Tween</figcaption>	
-			<div class="boxcon">
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
 
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
-				<div class="box"></div>
+		<select name="easing" id="selectEasing">
+		</select>
+		<figure id="normalTween">
+			<div class="boxcon">
+				<div class="box">
+					<div class="boxinner"></div>
+				</div>
 			</div>
 			
 		</figure>
-
+		
 		</section>
 	</body>
 </html>
