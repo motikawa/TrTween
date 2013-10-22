@@ -405,6 +405,121 @@ class BounceEaseOutIn extends IEasing
 			else
 				return (c / 2) - ((c / 2) * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375)) + (b + c / 2)
 
+class BezierSegment
+	constructor:(a,b,c,d)->
+		@_a = a
+		@_b = b
+		@_c = c
+		@_d = d
+	getValue:(t)->
+		ax = @_a.x
+		x = (t * t * (@_d.x - ax) + 3 * (1 - t) * (t * (@_c.x - ax) + (1 - t) * (@_b.x - ax))) * t + ax
+		ay = @_a.y
+		y = (t * t * (@_d.y - ay) + 3 * (1 - t) * (t * (@_c.y - ay) + (1 - t) * (@_b.y - ay))) * t + ay
+		return {x:x,y:y}
+	getYForX:(x,coefficients = null)->
+		if @_a.x < @_d.x
+			if x <= @_a.x + 0.0000000000000001
+				return @_a.y
+			else if x >= @_d.x - 0.0000000000000001
+				return @_d.y
+		else 
+			if x >= @_a.x + 0.0000000000000001
+				return @_a.y
+			if x <= @_d.x - 0.0000000000000001
+				return @_d.y
+			
+			
+		if !coefficients?
+			coefficients = BezierSegment.getCubicCoefficients(@_a.x, @_b.x, @_c.x, @_d.x)
+		
+		
+		roots = BezierSegment.getCubicRoots(coefficients[0], coefficients[1], coefficients[2], coefficients[3] - x)
+		time = NaN
+		root = NaN
+			
+		if roots.length is 0
+			time = 0;
+		else if roots.length is 1
+			time = roots[0]
+		else 
+			for root in roots
+				if 0 <= root and root <= 1
+					time = root
+					break
+
+		if isNaN(time) 
+			return NaN
+
+		return BezierSegment.getSingleValue(time, @_a.y, @_b.y, @_c.y, @_d.y)
+
+	@getSingleValue:(t,a = 0,b = 0,c = 0,d = 0)->
+		return (t * t * (d - a) + 3 * (1 - t) * (t * (c - a) + (1 - t) * (b - a))) * t + a
+	@getCubicCoefficients:(a,b,c,d)->
+		return [-a + 3 * b - 3 * c + d, 3 * a - 6 * b + 3 * c, -3 * a + 3 * b, a]
+	@getCubicRoots:(a = 0,b = 0,c = 0,d = 0)->
+		if !a
+			return BezierSegment.getQuadraticRoots(b, c, d)
+			
+		if a isnt 1
+			b /= a
+			c /= a
+			d /= a
+		
+		q = (b * b - 3 * c) / 9
+		qCubed = q * q * q
+		r = (2 * b * b * b - 9 * b * c + 27 * d) / 54
+		diff = qCubed - r * r
+			
+		if diff >= 0
+			if !q
+				return [0]
+			theta = Math.acos(r / Math.sqrt(qCubed))
+			qSqrt = Math.sqrt(q)
+			root1 = -2 * qSqrt * Math.cos(theta / 3) - b / 3
+			root2 = -2 * qSqrt * Math.cos((theta + 2 * Math.PI) / 3) - b / 3
+			root3 = -2 * qSqrt * Math.cos((theta + 4 * Math.PI) / 3) - b / 3
+
+			return [root1, root2, root3]
+
+		else 
+			tmp = Math.pow(Math.sqrt(-diff) + Math.abs(r), 1 / 3)
+			rSign = if r > 0 then 1 else if r < 0 then -1 else 0
+			root = -rSign * (tmp + q / tmp) - b / 3
+			return [root]
+		return []
+	@getQuadraticRoots:(a,b,c)->
+		roots = []
+		
+		if !a
+			if !b
+				return []
+			roots[0] = -c / b
+			return roots
+		
+		q = b * b - 4 * a * c
+		signQ = if q > 0 then 1 else if q < 0 then -1 else 0
+			
+		if signQ < 0
+			return []
+		
+		else if !signQ
+			roots[0] = -b / (2 * a)
+		else 
+			roots[0] = roots[1] = -b / (2 * a)
+			tmp = Math.sqrt(q) / (2 * a)
+			roots[0] -= tmp;
+			roots[1] += tmp;
+		return roots
+
+CustomEase = (p1x,p1y,p2x,p2y)->
+	return {
+		update:(t,b,c,d)->
+			bez = new BezierSegment({x:0,y:0},{x:p1x,y:p1y},{x:p2x,y:p2y},{x:1,y:1})
+			return c * bez.getYForX(t / d) + b
+	}
+
+
 Linear = {
 	easeNone:new LinearEaseNone()
 	easeOut:new LinearEaseNone()
@@ -587,5 +702,6 @@ window.jp.contents.easing.Quart = Quart
 window.jp.contents.easing.Expo = Expo
 window.jp.contents.easing.Elastic = Elastic
 window.jp.contents.easing.Bounce = Bounce
+window.jp.contents.easing.CustomEase = CustomEase
 window.jp.contents.easing.CSS3Easing = CSS3Easing
 window.jp.contents.easing.getEasingByString = getEasingByString

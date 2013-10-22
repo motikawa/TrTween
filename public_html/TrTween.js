@@ -2,7 +2,7 @@
 
   'use strict';
 
-  var APP_BROWSER, APP_OS, AnimationTween, Application, Back, BackEaseIn, BackEaseInOut, BackEaseInOutWith, BackEaseInWith, BackEaseOut, BackEaseOutIn, BackEaseOutInWith, BackEaseOutWith, BasicTween, BezierTween, Bounce, BounceEaseIn, BounceEaseInOut, BounceEaseOut, BounceEaseOutIn, BrowserName, CSS2W, CSS3Easing, Circ, CircEaseIn, CircEaseInOut, CircEaseOut, CircEaseOutIn, Cubic, CubicEaseIn, CubicEaseInOut, CubicEaseOut, CubicEaseOutIn, DelayTween, Delegate, EasingTween, Elastic, ElasticEaseIn, ElasticEaseInOut, ElasticEaseInOutWith, ElasticEaseInWith, ElasticEaseOut, ElasticEaseOutIn, ElasticEaseOutInWith, ElasticEaseOutWith, Expo, ExpoEaseIn, ExpoEaseInOut, ExpoEaseOut, ExpoEaseOutIn, FSW, FuncTween, ICSSTween, IEasing, ITween, ITweenGroup, Linear, LinearEaseNone, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Quad, QuadEaseIn, QuadEaseInOut, QuadEaseOut, QuadEaseOutIn, Quart, QuartEaseIn, QuartEaseInOut, QuartEaseOut, QuartEaseOutIn, Quint, QuintEaseIn, QuintEaseInOut, QuintEaseOut, QuintEaseOutIn, Render, RepeatTween, SerialTween, Sine, SineEaseIn, SineEaseInOut, SineEaseOut, SineEaseOutIn, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, getEasingByString, isFIE, isIOS, requestAnimationFrame;
+  var APP_BROWSER, APP_OS, AnimationTween, Application, Back, BackEaseIn, BackEaseInOut, BackEaseInOutWith, BackEaseInWith, BackEaseOut, BackEaseOutIn, BackEaseOutInWith, BackEaseOutWith, BasicTween, BezierSegment, BezierTween, Bounce, BounceEaseIn, BounceEaseInOut, BounceEaseOut, BounceEaseOutIn, BrowserName, CSS2W, CSS3Easing, Circ, CircEaseIn, CircEaseInOut, CircEaseOut, CircEaseOutIn, Cubic, CubicEaseIn, CubicEaseInOut, CubicEaseOut, CubicEaseOutIn, CustomEase, DelayTween, Delegate, EasingTween, Elastic, ElasticEaseIn, ElasticEaseInOut, ElasticEaseInOutWith, ElasticEaseInWith, ElasticEaseOut, ElasticEaseOutIn, ElasticEaseOutInWith, ElasticEaseOutWith, Expo, ExpoEaseIn, ExpoEaseInOut, ExpoEaseOut, ExpoEaseOutIn, FSW, FuncTween, ICSSTween, IEasing, ITween, ITweenGroup, Linear, LinearEaseNone, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Quad, QuadEaseIn, QuadEaseInOut, QuadEaseOut, QuadEaseOutIn, Quart, QuartEaseIn, QuartEaseInOut, QuartEaseOut, QuartEaseOutIn, Quint, QuintEaseIn, QuintEaseInOut, QuintEaseOut, QuintEaseOutIn, Render, RepeatTween, SerialTween, Sine, SineEaseIn, SineEaseInOut, SineEaseOut, SineEaseOutIn, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, getEasingByString, isFIE, isIOS, requestAnimationFrame;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   BrowserName = {
@@ -1117,6 +1117,157 @@
 
   })();
 
+  BezierSegment = (function() {
+
+    function BezierSegment(a, b, c, d) {
+      this._a = a;
+      this._b = b;
+      this._c = c;
+      this._d = d;
+    }
+
+    BezierSegment.prototype.getValue = function(t) {
+      var ax, ay, x, y;
+      ax = this._a.x;
+      x = (t * t * (this._d.x - ax) + 3 * (1 - t) * (t * (this._c.x - ax) + (1 - t) * (this._b.x - ax))) * t + ax;
+      ay = this._a.y;
+      y = (t * t * (this._d.y - ay) + 3 * (1 - t) * (t * (this._c.y - ay) + (1 - t) * (this._b.y - ay))) * t + ay;
+      return {
+        x: x,
+        y: y
+      };
+    };
+
+    BezierSegment.prototype.getYForX = function(x, coefficients) {
+      var root, roots, time, _i, _len;
+      if (coefficients == null) coefficients = null;
+      if (this._a.x < this._d.x) {
+        if (x <= this._a.x + 0.0000000000000001) {
+          return this._a.y;
+        } else if (x >= this._d.x - 0.0000000000000001) {
+          return this._d.y;
+        }
+      } else {
+        if (x >= this._a.x + 0.0000000000000001) return this._a.y;
+        if (x <= this._d.x - 0.0000000000000001) return this._d.y;
+      }
+      if (!(coefficients != null)) {
+        coefficients = BezierSegment.getCubicCoefficients(this._a.x, this._b.x, this._c.x, this._d.x);
+      }
+      roots = BezierSegment.getCubicRoots(coefficients[0], coefficients[1], coefficients[2], coefficients[3] - x);
+      time = NaN;
+      root = NaN;
+      if (roots.length === 0) {
+        time = 0;
+      } else if (roots.length === 1) {
+        time = roots[0];
+      } else {
+        for (_i = 0, _len = roots.length; _i < _len; _i++) {
+          root = roots[_i];
+          if (0 <= root && root <= 1) {
+            time = root;
+            break;
+          }
+        }
+      }
+      if (isNaN(time)) return NaN;
+      return BezierSegment.getSingleValue(time, this._a.y, this._b.y, this._c.y, this._d.y);
+    };
+
+    BezierSegment.getSingleValue = function(t, a, b, c, d) {
+      if (a == null) a = 0;
+      if (b == null) b = 0;
+      if (c == null) c = 0;
+      if (d == null) d = 0;
+      return (t * t * (d - a) + 3 * (1 - t) * (t * (c - a) + (1 - t) * (b - a))) * t + a;
+    };
+
+    BezierSegment.getCubicCoefficients = function(a, b, c, d) {
+      return [-a + 3 * b - 3 * c + d, 3 * a - 6 * b + 3 * c, -3 * a + 3 * b, a];
+    };
+
+    BezierSegment.getCubicRoots = function(a, b, c, d) {
+      var diff, q, qCubed, qSqrt, r, rSign, root, root1, root2, root3, theta, tmp;
+      if (a == null) a = 0;
+      if (b == null) b = 0;
+      if (c == null) c = 0;
+      if (d == null) d = 0;
+      if (!a) return BezierSegment.getQuadraticRoots(b, c, d);
+      if (a !== 1) {
+        b /= a;
+        c /= a;
+        d /= a;
+      }
+      q = (b * b - 3 * c) / 9;
+      qCubed = q * q * q;
+      r = (2 * b * b * b - 9 * b * c + 27 * d) / 54;
+      diff = qCubed - r * r;
+      if (diff >= 0) {
+        if (!q) return [0];
+        theta = Math.acos(r / Math.sqrt(qCubed));
+        qSqrt = Math.sqrt(q);
+        root1 = -2 * qSqrt * Math.cos(theta / 3) - b / 3;
+        root2 = -2 * qSqrt * Math.cos((theta + 2 * Math.PI) / 3) - b / 3;
+        root3 = -2 * qSqrt * Math.cos((theta + 4 * Math.PI) / 3) - b / 3;
+        return [root1, root2, root3];
+      } else {
+        tmp = Math.pow(Math.sqrt(-diff) + Math.abs(r), 1 / 3);
+        rSign = r > 0 ? 1 : r < 0 ? -1 : 0;
+        root = -rSign * (tmp + q / tmp) - b / 3;
+        return [root];
+      }
+      return [];
+    };
+
+    BezierSegment.getQuadraticRoots = function(a, b, c) {
+      var q, roots, signQ, tmp;
+      roots = [];
+      if (!a) {
+        if (!b) return [];
+        roots[0] = -c / b;
+        return roots;
+      }
+      q = b * b - 4 * a * c;
+      signQ = q > 0 ? 1 : q < 0 ? -1 : 0;
+      if (signQ < 0) {
+        return [];
+      } else if (!signQ) {
+        roots[0] = -b / (2 * a);
+      } else {
+        roots[0] = roots[1] = -b / (2 * a);
+        tmp = Math.sqrt(q) / (2 * a);
+        roots[0] -= tmp;
+        roots[1] += tmp;
+      }
+      return roots;
+    };
+
+    return BezierSegment;
+
+  })();
+
+  CustomEase = function(p1x, p1y, p2x, p2y) {
+    return {
+      update: function(t, b, c, d) {
+        var bez;
+        bez = new BezierSegment({
+          x: 0,
+          y: 0
+        }, {
+          x: p1x,
+          y: p1y
+        }, {
+          x: p2x,
+          y: p2y
+        }, {
+          x: 1,
+          y: 1
+        });
+        return c * bez.getYForX(t / d) + b;
+      }
+    };
+  };
+
   Linear = {
     easeNone: new LinearEaseNone(),
     easeOut: new LinearEaseNone(),
@@ -1332,6 +1483,8 @@
   window.jp.contents.easing.Elastic = Elastic;
 
   window.jp.contents.easing.Bounce = Bounce;
+
+  window.jp.contents.easing.CustomEase = CustomEase;
 
   window.jp.contents.easing.CSS3Easing = CSS3Easing;
 

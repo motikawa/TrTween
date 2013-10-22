@@ -26,6 +26,10 @@ class ITween
 		return
 	slice:(from,to)->
 		return
+	startRender:->
+		if Render.getState() is 0
+			Render.start()
+		return
 class ITweenGroup extends ITween
 	getTweens:->
 		return @_tweens

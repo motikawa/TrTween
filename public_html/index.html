@@ -11,7 +11,7 @@
 				background: #f1f1f1;
 			}*/
 			.boxcon{
-				width: 100%;height: 600px;
+				width: 100%;height: 220px;
 				-webkit-perspective: 300px;
 			}
 			.boxinner{
@@ -29,10 +29,18 @@
 				/*margin-left: -100px;*/
 			}
 			input[type=range]{
-				width: 500px;
+				width: 200px;
 				margin: 0 auto;
 			}
+			.component{
+				width: 500px;
+				display: none;
+			}
+			.component label{
+				width: 200px;
+				display: block;
 
+			}
 		</style>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		
@@ -51,6 +59,7 @@
 				Elastic = jp.contents.easing.Elastic,
 				Back = jp.contents.easing.Back,
 				Bounce = jp.contents.easing.Bounce,
+				CustomEase = jp.contents.easing.CustomEase,
 				easings = {
 					"Linear":Linear.easeNone,
 					"easeOutSine":Sine.easeOut,
@@ -92,19 +101,92 @@
 					"easeOutBounce":Bounce.easeOut,
 					"easeInBounce":Bounce.easeIn,
 					"easeInOutBounce":Bounce.easeInOut,
-					"easeOutInBounce":Bounce.easeOutIn
+					"easeOutInBounce":Bounce.easeOutIn,
+					"easeOutElasticWith":Elastic.easeOutWith,
+					"easeInElasticWith":Elastic.easeInWith,
+					"easeInOutElasticWith":Elastic.easeInOutWith,
+					"easeOutInElasticWith":Elastic.easeOutInWith,
+					"easeOutBackWith":Back.easeOutWith,
+					"easeInBackWith":Back.easeInWith,
+					"easeInOutBackWith":Back.easeInOutWith,
+					"easeOutInBackWith":Back.easeOutInWith,
+					"easeCustom":CustomEase
 				};
 			$(document).ready(function(){
-				var name,appendstr = "",box = $("#wrapper .boxinner")[0];
+				var name,appendstr = "",box = $("#wrapper .boxinner")[0],easing;
 				for (name in easings)
 				{
 					appendstr += "<option value='" + name + "'>" + name + "</option>";
 				}
 				$("#selectEasing").append(appendstr).bind("change",function(){
-					var easing = easings[this.value];
-					console.log(easing);
-					TrTween.tween(box,{x:600},{x:0},1.5,easing).play();
+					easing = easings[this.value];
+					
+					if(this.value === "easeOutElasticWith" || this.value === "easeInElasticWith" || this.value === "easeInOutElasticWith" || this.value === "easeOutInElasticWith")
+					{
+						$("#ampcmp").css("display","block");
+						$("#periodocmp").css("display","block");
+						$("#scom").css("display","none");
+						$("#customParam").css("display","none");
+					}
+					else if(this.value === "easeOutBackWith" || this.value === "easeInBackWith" || this.value === "easeInOutBackWith" || this.value === "easeOutInBackWith")
+					{
+						$("#ampcmp").css("display","none");
+						$("#periodocmp").css("display","none");
+						$("#scom").css("display","block");
+						$("#customParam").css("display","none");
+					}
+					else if(this.value="easeCustom")
+					{
+						$("#ampcmp").css("display","none");
+						$("#periodocmp").css("display","none");
+						$("#scom").css("display","none");
+						$("#customParam").css("display","block");
+					}
+					else
+					{
+						$("#ampcmp").css("display","none");
+						$("#periodocmp").css("display","none");
+						$("#scom").css("display","none");
+						$("#customParam").css("display","none");
+					}
+						
+
+					
 				})
+				$("input[type=range]").change(function(){
+					var t = $(this),
+						p = t.parent();
+					p.find("span").html(this.value);
+
+				});
+				$("input[type=range]").trigger("change");
+
+				$("input[type=button]").click(function(){
+					if(easing === Back.easeOutWith || easing === Back.easeInWith || easing === Back.easeInOutWith || easing === Back.easeOutInWith)
+					{
+						var s = Number($("#se")[0].value);
+						
+						TrTween.tween(box,{x:800},{x:0},1.5,easing(s)).play();
+					}
+					else if(easing === Elastic.easeOutWith || easing === Elastic.easeInWith || easing === Elastic.easeInOutWith || easing === Elastic.easeOutInWith)
+					{
+						var a = Number($("#amp")[0].value),
+							p = Number($("#period")[0].value);
+						TrTween.tween(box,{x:800},{x:0},1.5,easing(a,p)).play();
+					}
+					else if(easing === CustomEase)
+					{
+						var p1x = Number($("#p1x")[0].value),
+							p1y = Number($("#p1y")[0].value),
+							p2x = Number($("#p2x")[0].value),
+							p2y = Number($("#p2y")[0].value);
+						TrTween.tween(box,{x:800},{x:0},1.5,easing(p1x,p1y,p2x,p2y)).play()
+					}
+					else
+					{
+						TrTween.tween(box,{x:800},{x:0},1.5,easing).play();
+					}
+				});
 			});
 
 			
@@ -116,13 +198,22 @@
 
 		<select name="easing" id="selectEasing">
 		</select>
+		<p id="ampcmp"  class="component"><label>amplitude:　</label><input type="range" name="amplitude" id="amp" min="0" max="5" step="0.05" value="0"><span class="rvalue"></span></p>
+		<p id="periodocmp" class="component"><label>period:　</label><input type="range" name="period" id="period" min="0" max="5" step="0.05" value="0"><span class="rvalue"></span></p>
+		<p id="scom" class="component"><label>s:　</label><input type="range" name="period" id="se" min="0" max="5" step="0.05" value="0"><span class="rvalue"></span></p>
+		<div id="customParam" class="component">
+			<p><label>p1x:　</label><input type="range" name="period" id="p1x" min="-3" max="3" step="0.01" value="0"><span class="rvalue"></span></p>
+			<p><label>p1y:　</label><input type="range" name="period" id="p1y" min="-3" max="3" step="0.01" value="0"><span class="rvalue"></span></p>
+			<p><label>p2x:　</label><input type="range" name="period" id="p2x" min="-3" max="3" step="0.01" value="0"><span class="rvalue"></span></p>
+			<p><label>p2y:　</label><input type="range" name="period" id="p2y" min="-3" max="3" step="0.01" value="0"><span class="rvalue"></span></p>
+		</div>
 		<figure id="normalTween">
 			<div class="boxcon">
 				<div class="box">
 					<div class="boxinner"></div>
 				</div>
 			</div>
-			
+		<input type="button" value="PLAY!">
 		</figure>
 		
 		</section>

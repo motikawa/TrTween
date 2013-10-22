@@ -17,8 +17,7 @@ class BasicTween extends ITween
 	play:->
 		@_state = TweenState.Playing
 		@register(false)
-		if Render.getState() is 0
-			Render.start()
+		@startRender()
 		if @_onPlay
 			@_onPlay(@)
 		return
@@ -52,6 +51,8 @@ class BasicTween extends ITween
 		return
 	clone:->
 		return new BasicTween(@_target,@_tp,@_from,@_duration / 1000,@_easing)
+	slice:(from,to)->
+		return new SlicedTween(from,to,@)
 	gotoAndStop:(parsent)->
 		parsent = if parsent > 1 then 1 else if parsent < 0 then 0 else parsent
 		# console.log("sss",parsent,@)
