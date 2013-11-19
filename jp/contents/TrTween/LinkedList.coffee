@@ -19,6 +19,7 @@ class LinkedList
 		else
 			@_last.next = obj
 		@_last = obj
+		++@length
 		return
 	slice:(elm)->
 		f = @_first

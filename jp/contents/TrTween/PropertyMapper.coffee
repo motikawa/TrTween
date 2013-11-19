@@ -367,15 +367,17 @@ class ObjectMapper extends PropertyMapper
 		@_tweens = null
 	applyStyles:->
 		f = @_tweens.getFirst()
+		# console.log(@_tweens.length)
 		while f
 			n = f.elm.name
+			# console.log(n,f.elm.tween,f.next)
 			@_target[n] = @[n]
-			if f.elm.hasUpdater
+			if f.elm.tween? and f.elm.hasUpdater
 				f = @_target.updaters[n]
 				f.apply(@_target,[@[n]])
 			f = f.next
 		return
-	registerTween:(tween)->
+	registerTween:(tween,fixOnly = false)->
 		to = tween._to
 		from = tween._from
 		c = {}
@@ -397,6 +399,7 @@ class ObjectMapper extends PropertyMapper
 			hasUpdater = false
 			if @_target.updaters and @_target.updaters[name]
 				hasUpdater = true
+			
 			while f
 				if f.elm.name is name
 					find = true
@@ -405,7 +408,8 @@ class ObjectMapper extends PropertyMapper
 				f = f.next
 			if !find
 				tw.push({name:name,tween:tween,hasUpdater:hasUpdater})
-
+		if fixOnly
+			return c
 		Render.addListener(@)
 		return c
 	update:(ct)->

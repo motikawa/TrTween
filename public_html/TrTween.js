@@ -1600,6 +1600,7 @@
         this._last.next = obj;
       }
       this._last = obj;
+      ++this.length;
     };
 
     LinkedList.prototype.slice = function(elm) {
@@ -2600,7 +2601,7 @@
       while (f) {
         n = f.elm.name;
         this._target[n] = this[n];
-        if (f.elm.hasUpdater) {
+        if ((f.elm.tween != null) && f.elm.hasUpdater) {
           f = this._target.updaters[n];
           f.apply(this._target, [this[n]]);
         }
@@ -2608,8 +2609,9 @@
       }
     };
 
-    ObjectMapper.prototype.registerTween = function(tween) {
+    ObjectMapper.prototype.registerTween = function(tween, fixOnly) {
       var c, f, find, fp, from, hasUpdater, name, to, tw;
+      if (fixOnly == null) fixOnly = false;
       to = tween._to;
       from = tween._from;
       c = {};
@@ -2648,6 +2650,7 @@
           });
         }
       }
+      if (fixOnly) return c;
       Render.addListener(this);
       return c;
     };
@@ -2746,6 +2749,10 @@
 
     ITween.prototype.slice = function(from, to) {};
 
+    ITween.prototype.startRender = function() {
+      if (Render.getState() === 0) Render.start();
+    };
+
     return ITween;
 
   })();
@@ -2809,7 +2816,7 @@
     BasicTween.prototype.play = function() {
       this._state = TweenState.Playing;
       this.register(false);
-      if (Render.getState() === 0) Render.start();
+      this.startRender();
       if (this._onPlay) this._onPlay(this);
     };
 
@@ -2844,6 +2851,10 @@
 
     BasicTween.prototype.clone = function() {
       return new BasicTween(this._target, this._tp, this._from, this._duration / 1000, this._easing);
+    };
+
+    BasicTween.prototype.slice = function(from, to) {
+      return new SlicedTween(from, to, this);
     };
 
     BasicTween.prototype.gotoAndStop = function(parsent) {
