@@ -27,6 +27,8 @@ class TrTween
 		return new PropertyTween(target,propaties)
 	@wait:(time)->
 		return new WaitTween(time)
+	@changeUnit:(target,prop)->
+		return new ChangeUnitTween(target,prop)
 	@version = "0.2.1"
 	@DefaultEasing = Linear.easeNone
 	@DefaultCssEasing = CSS3Easing.linear
@@ -39,3 +41,4 @@ window.jp.contents.collections.LinkedList = LinkedList
 window.jp.contents.mapper = window.jp.contents.mapper || {}
 window.jp.contents.mapper.PropertyMapper = PropertyMapper
 window.jp.contents.TrTween.TrTween = TrTween
+window.jp.contents.TrTween.Render = Render

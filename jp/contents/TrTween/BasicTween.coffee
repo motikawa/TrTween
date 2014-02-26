@@ -33,7 +33,6 @@ class BasicTween extends ITween
 			@_state = TweenState.Completed
 			return
 		@_mapper[prop] = @_easing.update(ct - @_st,@_from[prop],@_c[prop],@_duration)
-		# console.log("---->",prop,@_mapper[prop])
 		return
 	tickUpdate:->
 		if @_onUpdate
@@ -55,7 +54,6 @@ class BasicTween extends ITween
 		return new SlicedTween(from,to,@)
 	gotoAndStop:(parsent)->
 		parsent = if parsent > 1 then 1 else if parsent < 0 then 0 else parsent
-		# console.log("sss",parsent,@)
 		if parsent is 1 and @_state is TweenState.Completed or parsent is 0 and @_state is TweenState.Initialized
 			return
 
@@ -72,7 +70,6 @@ class BasicTween extends ITween
 					@update(ct,val)
 					@_mapper.applyStyles()
 				@_c = null
-				# @_from = {}
 				@_state = TweenState.Initialized
 				
 			return
@@ -82,7 +79,6 @@ class BasicTween extends ITween
 					@update(ct,val)
 					@_mapper.applyStyles()
 				@_c = null
-				# @_from = {}
 				@_state = TweenState.Completed
 				
 			return

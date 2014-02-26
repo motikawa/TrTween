@@ -263,95 +263,107 @@ class CSS2W
 	@_propList = {
 		top:{
 			prefix:"top:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.top * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.top * 1000)|0) * .001
+				return val + sufix + ";" 
 		},
 		bottom:{
 			prefix:"bottom:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.bottom * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.bottom * 1000)|0) * .001
+				return val + sufix + ";" 
 		},
 		left:{
 			prefix:"left:",
 			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.left * 1000)|0) * .001
+			fixFunc:(m,sufix)->
+				val = ((m.left * 1000)|0) * .001
+				return val + sufix + ";"
 		},
 		right:{
 			prefix:"right:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.right * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.right * 1000)|0) * .001
+				return val + sufix + ";"
 		},
 		width:{
 			prefix:"width:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.width * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.width * 1000)|0) * .001
+				return val + sufix + ";"
 		},
 		height:{
 			prefix:"height:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.height * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.height * 1000)|0) * .001
+				return val + sufix + ";"
 		},
 		margin:{
 			prefix:"margin:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.margin * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.margin * 1000)|0) * .001
+				return val + sufix + ";"
 		}
 		marginTop:{
 			prefix:"margin-top:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.marginTop * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.marginTop * 1000)|0) * .001
+				return val + sufix + ";"
 		},
 		marginBottom:{
 			prefix:"margin-bottom:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.marginBottom * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.marginBottom * 1000)|0) * .001
+				return val + sufix + ";"
 		},
 		marginLeft:{
 			prefix:"margin-left:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.marginLeft * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.marginLeft * 1000)|0) * .001
+				return val + sufix + ";"
 		},
 		marginRight:{
 			prefix:"margin-right:",
-			sufix:"px;",
-			fixFunc:(m)->
-				return ((m.marginRight * 1000)|0) * .001
+			sufix:"px",
+			fixFunc:(m,sufix)->
+				val = ((m.marginRight * 1000)|0) * .001 
+				return val + sufix + ";"
 		},
 		alpha:{
 			prefix:"opacity:",
-			sufix:";",
-			fixFunc:(m)->
-				return ((m.alpha * 1000)|0) * .001
+			sufix:"",
+			fixFunc:(m,sufix)->
+				val = ((m.alpha * 1000)|0) * .001
+				return val + ";"
 		},
 		backgroundPosition:{
 			prefix:"background-position:",
-			sufix:";",
-			fixFunc:(m)->
+			sufix:"px",
+			fixFunc:(m,sufix)->
 				vx = ((m.backgroundPositionX * 1000)|0) * .001
 				vy = ((m.backgroundPositionY * 1000)|0) * .001
-				return vx + "px " + vy + "px"
+				return vx + sufix + " " + vy + sufix + ";"
 		},
 		visible:{
 			prefix:"visibility:",
-			sufix:";",
-			fixFunc:(m)->
-				return if m.visible then "visible" else "hidden"
+			sufix:"",
+			fixFunc:(m,sufix)->
+				return if m.visible then "visible;" else "hidden;"
 		},
 		display:{
 			prefix:"display:",
-			sufix:";",
-			fixFunc:(m)->
-				return m.display
+			sufix:"",
+			fixFunc:(m,sufix)->
+				return m.display + ";"
 		}
 	}
 	@init:->
@@ -366,17 +378,19 @@ class CSS2W
 		if ver >= 8
 			CSS2W._propList.alpha = {
 				prefix:"zoom:1;-ms-filter:\"alpha(opacity=",
-				sufix:")\";",
-				fixFunc:(m)->
-					return ((m.alpha * 1000)|0) * .1
+				sufix:"",
+				fixFunc:(m,sufix)->
+					val = ((m.alpha * 1000)|0) * .1
+					return val + ")\";"
 				
 			}
 		else
 			CSS2W._propList.alpha = {
 				prefix:"zoom:1;filter:alpha(opacity=",
-				sufix:");",
-				fixFunc:(m)->
-					return ((m.alpha * 1000)|0) * .1
+				sufix:"",
+				fixFunc:(m,sufix)->
+					val = ((m.alpha * 1000)|0) * .1
+					return val + ");"
 			}
 	_parsePropaties:->
 		owner = @
@@ -435,11 +449,21 @@ class CSS2W
 		@_mapper = mapper
 		@_hasProperties = []
 		@_pl = CSS2W._propList
+		@_sufixes = {}
+		for name of @_pl
+			@_sufixes[name] = @_pl[name].sufix
 		@toStyleString = ->
 			return ""
 		@_parsePropaties()
 		return
-
+	changeUnit:(props)->
+		before = {}
+		for val of props
+			if @_sufixes[val] isnt undefined
+				sufix = props[val]
+				before[val] = @_sufixes[val]
+				@_sufixes[val] = sufix
+		return before
 	pushProperty:(propname)->
 		if propname is "backgroundPositionY" or propname is "backgroundPositionX" or propname is "backgroundPosition"
 			if isNaN(@_mapper.backgroundPositionX)
@@ -460,10 +484,11 @@ class CSS2W
 		trstr = ""
 		m = @_mapper
 		p = @_pl
+		s = @_sufixes
 		for val,i in @_hasProperties
 			obj = p[val]
-			v = obj.fixFunc(m)
-			trstr += obj.prefix + v+ obj.sufix
+			v = obj.fixFunc(m,s[val])
+			trstr += obj.prefix + v
 		return trstr
 
 CSS2W.init()

@@ -28,6 +28,8 @@ cancelAnimationFrame = (()->
     		window.msCancelRequestAnimationFrame ||
     		window.clearTimeout;
 )()
+
+
 class VenderInfo
 	@cssVender = ""
 	@vender = ""

@@ -6,11 +6,6 @@ class TransitionTween extends ICSSTween
 		@_easing = if cssEasing then CSS3Easing[cssEasing] else TrTween.DefaultCssEasing
 		@_transitionName = VenderInfo.vender + "Transition"
 		@_transitionEnd = VenderInfo.vender + "TransitionEnd"
-		# @_transitionEnd = "TransitionEnd"
-		# console.log(APP_BROWSER.name)
-		# if APP_BROWSER.name is "firefox"
-		# 	@_transitionEnd = "transitionend"
-		# console.log(@_transitionEnd)
 		@_transitionNameCSS = VenderInfo.cssVender + "transition"
 		@_duration = duration * 1000
 		@_state = TweenState.Initialized

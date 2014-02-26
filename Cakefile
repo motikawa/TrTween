@@ -40,7 +40,8 @@ project_files = [
 		"PropertyTween.coffee",
 		"TransitionTween.coffee",
 		"AnimationTween.coffee",
-		"TrTween.coffee"
+		"TrTween.coffee",
+		"../display/SpriteSheet.coffee"
 	]}
 ]
 {exec} = require 'child_process'

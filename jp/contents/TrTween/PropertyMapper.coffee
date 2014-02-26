@@ -267,7 +267,9 @@ class PropertyMapper
 		return
 	_applyStylesForFIE:->
 		@_target.style.cssText = @_css2W.toStyleString()
-		return		
+		return
+	changeUnit:(props)->
+		return @_css2W.changeUnit(props)
 	applyProperties:(properties,applyStyle)->
 		change = false
 		for name of properties
@@ -373,8 +375,8 @@ class ObjectMapper extends PropertyMapper
 			# console.log(n,f.elm.tween,f.next)
 			@_target[n] = @[n]
 			if f.elm.tween? and f.elm.hasUpdater
-				f = @_target.updaters[n]
-				f.apply(@_target,[@[n]])
+				fn = @_target.updaters[n]
+				fn.apply(@_target,[@[n]])
 			f = f.next
 		return
 	registerTween:(tween,fixOnly = false)->
@@ -416,9 +418,11 @@ class ObjectMapper extends PropertyMapper
 		f = @_tweens.getFirst()
 		while f
 			tw = f.elm.tween
+
 			if !tw
 				f = f.next
 				continue
+
 			if tw._state is TweenState.Completed or tw._state is TweenState.Playing
 				tw.update(ct,f.elm.name)
 			f = f.next

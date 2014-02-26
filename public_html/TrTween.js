@@ -2,7 +2,7 @@
 
   'use strict';
 
-  var APP_BROWSER, APP_OS, AnimationTween, Application, Back, BackEaseIn, BackEaseInOut, BackEaseInOutWith, BackEaseInWith, BackEaseOut, BackEaseOutIn, BackEaseOutInWith, BackEaseOutWith, BasicTween, BezierSegment, BezierTween, Bounce, BounceEaseIn, BounceEaseInOut, BounceEaseOut, BounceEaseOutIn, BrowserName, CSS2W, CSS3Easing, Circ, CircEaseIn, CircEaseInOut, CircEaseOut, CircEaseOutIn, Cubic, CubicEaseIn, CubicEaseInOut, CubicEaseOut, CubicEaseOutIn, CustomEase, DelayTween, Delegate, EasingTween, Elastic, ElasticEaseIn, ElasticEaseInOut, ElasticEaseInOutWith, ElasticEaseInWith, ElasticEaseOut, ElasticEaseOutIn, ElasticEaseOutInWith, ElasticEaseOutWith, Expo, ExpoEaseIn, ExpoEaseInOut, ExpoEaseOut, ExpoEaseOutIn, FSW, FuncTween, ICSSTween, IEasing, ITween, ITweenGroup, Linear, LinearEaseNone, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Quad, QuadEaseIn, QuadEaseInOut, QuadEaseOut, QuadEaseOutIn, Quart, QuartEaseIn, QuartEaseInOut, QuartEaseOut, QuartEaseOutIn, Quint, QuintEaseIn, QuintEaseInOut, QuintEaseOut, QuintEaseOutIn, Render, RepeatTween, SerialTween, Sine, SineEaseIn, SineEaseInOut, SineEaseOut, SineEaseOutIn, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, getEasingByString, isFIE, isIOS, requestAnimationFrame;
+  var APP_BROWSER, APP_OS, AnimationTween, Application, Back, BackEaseIn, BackEaseInOut, BackEaseInOutWith, BackEaseInWith, BackEaseOut, BackEaseOutIn, BackEaseOutInWith, BackEaseOutWith, BackgroundSprite, BasicTween, BezierSegment, BezierTween, Bounce, BounceEaseIn, BounceEaseInOut, BounceEaseOut, BounceEaseOutIn, BrowserName, CSS2W, CSS3Easing, ChangeUnitTween, Circ, CircEaseIn, CircEaseInOut, CircEaseOut, CircEaseOutIn, Cubic, CubicEaseIn, CubicEaseInOut, CubicEaseOut, CubicEaseOutIn, CustomEase, DelayTween, Delegate, EasingTween, Elastic, ElasticEaseIn, ElasticEaseInOut, ElasticEaseInOutWith, ElasticEaseInWith, ElasticEaseOut, ElasticEaseOutIn, ElasticEaseOutInWith, ElasticEaseOutWith, Expo, ExpoEaseIn, ExpoEaseInOut, ExpoEaseOut, ExpoEaseOutIn, FSW, FuncTween, ICSSTween, IEasing, ITween, ITweenGroup, ImageSpriteSheet, Linear, LinearEaseNone, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Quad, QuadEaseIn, QuadEaseInOut, QuadEaseOut, QuadEaseOutIn, Quart, QuartEaseIn, QuartEaseInOut, QuartEaseOut, QuartEaseOutIn, Quint, QuintEaseIn, QuintEaseInOut, QuintEaseOut, QuintEaseOutIn, Render, RepeatTween, SerialTween, Sine, SineEaseIn, SineEaseInOut, SineEaseOut, SineEaseOutIn, SpriteSheet, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, getEasingByString, isFIE, isIOS, requestAnimationFrame;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   BrowserName = {
@@ -42,10 +42,11 @@
     function Application() {}
 
     Application._init = function() {
-      var bName, bVer, isIOS, isMobile, osName, osVar, ua;
+      var bName, bVer, isIOS, isKA, isMobile, osName, osVar, ua;
       ua = navigator.userAgent.toUpperCase();
       isMobile = false;
       isIOS = false;
+      isKA = false;
       if (ua.indexOf("CHROME") > -1) {
         bName = BrowserName.Chrome;
         ua.match(/CHROME\/(\d+(\.\d+)+)/ig);
@@ -75,6 +76,7 @@
         osVar = Number(osVar);
         osName = OSName.Android;
         isMobile = true;
+        if (osVar < 400) isKA = true;
       } else if (ua.indexOf("IPHONE") > -1) {
         ua.match(/IPHONE OS (\w+){1,3}/g);
         osVar = (RegExp.$1.replace(/_/g, '') + '00').slice(0, 3);
@@ -108,6 +110,7 @@
       Application._osVersion = osVar;
       Application._isMobile = isMobile;
       Application._isiOS = isIOS;
+      Application._isKAnd = isKA;
       Application._browserInfo = {
         name: Application._browserName,
         version: parseFloat(Application._browserVersion)
@@ -131,6 +134,11 @@
     Application.isMobile = function() {
       if (!Application._browserInfo) Application._init();
       return Application._isMobile;
+    };
+
+    Application.isKAndroid = function() {
+      if (!Application._browserInfo) Application._init();
+      return Application._isKAnd;
     };
 
     Application.isiOS = function() {
@@ -2006,114 +2014,138 @@
     CSS2W._propList = {
       top: {
         prefix: "top:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.top * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.top * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       bottom: {
         prefix: "bottom:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.bottom * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.bottom * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       left: {
         prefix: "left:",
         sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.left * 1000) | 0) * .001;
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.left * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       right: {
         prefix: "right:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.right * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.right * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       width: {
         prefix: "width:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.width * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.width * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       height: {
         prefix: "height:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.height * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.height * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       margin: {
         prefix: "margin:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.margin * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.margin * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       marginTop: {
         prefix: "margin-top:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.marginTop * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.marginTop * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       marginBottom: {
         prefix: "margin-bottom:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.marginBottom * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.marginBottom * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       marginLeft: {
         prefix: "margin-left:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.marginLeft * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.marginLeft * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       marginRight: {
         prefix: "margin-right:",
-        sufix: "px;",
-        fixFunc: function(m) {
-          return ((m.marginRight * 1000) | 0) * .001;
+        sufix: "px",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.marginRight * 1000) | 0) * .001;
+          return val + sufix + ";";
         }
       },
       alpha: {
         prefix: "opacity:",
-        sufix: ";",
-        fixFunc: function(m) {
-          return ((m.alpha * 1000) | 0) * .001;
+        sufix: "",
+        fixFunc: function(m, sufix) {
+          var val;
+          val = ((m.alpha * 1000) | 0) * .001;
+          return val + ";";
         }
       },
       backgroundPosition: {
         prefix: "background-position:",
-        sufix: ";",
-        fixFunc: function(m) {
+        sufix: "px",
+        fixFunc: function(m, sufix) {
           var vx, vy;
           vx = ((m.backgroundPositionX * 1000) | 0) * .001;
           vy = ((m.backgroundPositionY * 1000) | 0) * .001;
-          return vx + "px " + vy + "px";
+          return vx + sufix + " " + vy + sufix + ";";
         }
       },
       visible: {
         prefix: "visibility:",
-        sufix: ";",
-        fixFunc: function(m) {
+        sufix: "",
+        fixFunc: function(m, sufix) {
           if (m.visible) {
-            return "visible";
+            return "visible;";
           } else {
-            return "hidden";
+            return "hidden;";
           }
         }
       },
       display: {
         prefix: "display:",
-        sufix: ";",
-        fixFunc: function(m) {
-          return m.display;
+        sufix: "",
+        fixFunc: function(m, sufix) {
+          return m.display + ";";
         }
       }
     };
@@ -2130,17 +2162,21 @@
       if (ver >= 8) {
         return CSS2W._propList.alpha = {
           prefix: "zoom:1;-ms-filter:\"alpha(opacity=",
-          sufix: ")\";",
-          fixFunc: function(m) {
-            return ((m.alpha * 1000) | 0) * .1;
+          sufix: "",
+          fixFunc: function(m, sufix) {
+            var val;
+            val = ((m.alpha * 1000) | 0) * .1;
+            return val + ")\";";
           }
         };
       } else {
         return CSS2W._propList.alpha = {
           prefix: "zoom:1;filter:alpha(opacity=",
-          sufix: ");",
-          fixFunc: function(m) {
-            return ((m.alpha * 1000) | 0) * .1;
+          sufix: "",
+          fixFunc: function(m, sufix) {
+            var val;
+            val = ((m.alpha * 1000) | 0) * .1;
+            return val + ");";
           }
         };
       }
@@ -2210,15 +2246,33 @@
     };
 
     function CSS2W(mapper) {
+      var name;
       this._mapper = mapper;
       this._hasProperties = [];
       this._pl = CSS2W._propList;
+      this._sufixes = {};
+      for (name in this._pl) {
+        this._sufixes[name] = this._pl[name].sufix;
+      }
       this.toStyleString = function() {
         return "";
       };
       this._parsePropaties();
       return;
     }
+
+    CSS2W.prototype.changeUnit = function(props) {
+      var before, sufix, val;
+      before = {};
+      for (val in props) {
+        if (this._sufixes[val] !== void 0) {
+          sufix = props[val];
+          before[val] = this._sufixes[val];
+          this._sufixes[val] = sufix;
+        }
+      }
+      return before;
+    };
 
     CSS2W.prototype.pushProperty = function(propname) {
       if (propname === "backgroundPositionY" || propname === "backgroundPositionX" || propname === "backgroundPosition") {
@@ -2236,16 +2290,17 @@
     };
 
     CSS2W.prototype._toStyleString = function() {
-      var i, m, obj, p, trstr, v, val, _len, _ref;
+      var i, m, obj, p, s, trstr, v, val, _len, _ref;
       trstr = "";
       m = this._mapper;
       p = this._pl;
+      s = this._sufixes;
       _ref = this._hasProperties;
       for (i = 0, _len = _ref.length; i < _len; i++) {
         val = _ref[i];
         obj = p[val];
-        v = obj.fixFunc(m);
-        trstr += obj.prefix + v + obj.sufix;
+        v = obj.fixFunc(m, s[val]);
+        trstr += obj.prefix + v;
       }
       return trstr;
     };
@@ -2514,6 +2569,10 @@
       this._target.style.cssText = this._css2W.toStyleString();
     };
 
+    PropertyMapper.prototype.changeUnit = function(props) {
+      return this._css2W.changeUnit(props);
+    };
+
     PropertyMapper.prototype.applyProperties = function(properties, applyStyle) {
       var change, name;
       change = false;
@@ -2596,14 +2655,14 @@
     }
 
     ObjectMapper.prototype.applyStyles = function() {
-      var f, n;
+      var f, fn, n;
       f = this._tweens.getFirst();
       while (f) {
         n = f.elm.name;
         this._target[n] = this[n];
         if ((f.elm.tween != null) && f.elm.hasUpdater) {
-          f = this._target.updaters[n];
-          f.apply(this._target, [this[n]]);
+          fn = this._target.updaters[n];
+          fn.apply(this._target, [this[n]]);
         }
         f = f.next;
       }
@@ -3694,6 +3753,61 @@
 
   })();
 
+  ChangeUnitTween = (function() {
+
+    __extends(ChangeUnitTween, ITween);
+
+    function ChangeUnitTween(target, properties) {
+      this._target = target;
+      this._prop = properties;
+      this._duration = 25;
+      this._bProps = null;
+    }
+
+    ChangeUnitTween.prototype.play = function() {
+      var _this = this;
+      this._mapper = this._mapper || PropertyMapper.getMapper(this._target);
+      this._mapper.changeUnit(this._prop);
+      setTimeout(function() {
+        return _this.finalize();
+      }, 25);
+    };
+
+    ChangeUnitTween.prototype.finalize = function() {
+      this._state = TweenState.Finalized;
+      if (this._onComplete) this._onComplete(this);
+    };
+
+    ChangeUnitTween.prototype.clone = function() {
+      return new ChangeUnitTween(this._target, this._prop);
+    };
+
+    ChangeUnitTween.prototype.gotoAndStop = function(parsent) {
+      var mapper;
+      parsent = parsent > 1 ? 1 : parsent < 0 ? 0 : parsent;
+      mapper = this._mapper || PropertyMapper.getMapper(this._target);
+      if (parsent === 1) {
+        this._bProps = mapper.changeUnit(this._prop);
+        this._state = TweenState.Completed;
+      } else if (parsent === 0) {
+        this._state = TweenState.Initialized;
+        if (this._bProps != null) {
+          mapper.changeUnit(this._bProps);
+          this._bProps = null;
+        }
+      } else {
+        this._state = TweenState.Playing;
+        if (this._bProps != null) {
+          mapper.changeUnit(this._bProps);
+          this._bProps = null;
+        }
+      }
+    };
+
+    return ChangeUnitTween;
+
+  })();
+
   TransitionTween = (function() {
 
     __extends(TransitionTween, ICSSTween);
@@ -3936,6 +4050,10 @@
       return new WaitTween(time);
     };
 
+    TrTween.changeUnit = function(target, prop) {
+      return new ChangeUnitTween(target, prop);
+    };
+
     TrTween.version = "0.2.1";
 
     TrTween.DefaultEasing = Linear.easeNone;
@@ -3961,5 +4079,238 @@
   window.jp.contents.mapper.PropertyMapper = PropertyMapper;
 
   window.jp.contents.TrTween.TrTween = TrTween;
+
+  window.jp.contents.TrTween.Render = Render;
+
+  TrTween = jp.contents.TrTween.TrTween;
+
+  Render = jp.contents.TrTween.Render;
+
+  SpriteSheet = (function() {
+
+    function SpriteSheet(target, step, fps) {
+      var _this = this;
+      if (fps == null) fps = 30;
+      this._target = target;
+      this._step = step;
+      this._fps = 1000 / fps;
+      this._isPlaying = false;
+      this._ut = 0;
+      this._updateParams = [];
+      this._udcount = 0;
+      this.x = 0;
+      this.y = 0;
+      this.z = 0;
+      this.scaleX = 1;
+      this.scaleY = 1;
+      this.alpha = 1;
+      this.rotation = 0;
+      this.rotationX = 0;
+      this.rotationY = 0;
+      this.rotationZ = 0;
+      this.updaters = {
+        x: function() {
+          _this._updateParams.push("x");
+          _this.updaters.x = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        y: function() {
+          _this._updateParams.push("y");
+          _this.updaters.y = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        z: function() {
+          _this._updateParams.push("z");
+          _this.updaters.z = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        alpha: function() {
+          _this._updateParams.push("alpha");
+          _this.updaters.alpha = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        scaleX: function() {
+          _this._updateParams.push("scaleX");
+          _this.updaters.scaleX = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        scaleY: function() {
+          _this._updateParams.push("scaleY");
+          _this.updaters.scaleY = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        rotation: function() {
+          _this._updateParams.push("rotation");
+          _this.updaters.rotation = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        rotationX: function() {
+          _this._updateParams.push("rotationX");
+          _this.updaters.rotationX = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        rotationY: function() {
+          _this._updateParams.push("rotationY");
+          _this.updaters.rotationY = _this.onParamUpdate;
+          _this.onParamUpdate();
+        },
+        rotationZ: function() {
+          _this._updateParams.push("rotationZ");
+          _this.updaters.rotationZ = _this.onParamUpdate;
+          _this.onParamUpdate();
+        }
+      };
+    }
+
+    SpriteSheet.prototype.onParamUpdate = function() {
+      var obj, val, _i, _len, _ref;
+      console.log(this._udcount);
+      if (++this._udcount === this._updateParams.length) {
+        console.log("moja-", this.x, this.y, this._udcount, this._updateParams.length);
+        this._udcount = 0;
+        obj = {};
+        _ref = this._updateParams;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          val = _ref[_i];
+          obj[val] = this[val];
+        }
+        TrTween.prop(this._target, obj).play();
+      }
+    };
+
+    SpriteSheet.prototype.gotoAndPlay = function(frame) {
+      frame = frame < 1 ? 1 : frame > this._totalFrames ? this._totalFrames : frame;
+      this._currentFrame = frame;
+      this._draw();
+      this._ut = new Date().getTime();
+      if (!this._isPlaying) {
+        Render.addListener(this);
+        this._isPlaying = true;
+        if (Render.getState() === 0) Render.start();
+      }
+    };
+
+    SpriteSheet.prototype.gotoAndStop = function(frame) {
+      if (this._isPlaying) Render.removeListener(this);
+      this._isPlaying = false;
+      frame = frame < 1 ? 1 : frame > this._totalFrames ? this._totalFrames : frame;
+      this._currentFrame = frame;
+      this._draw();
+    };
+
+    SpriteSheet.prototype.getCurrentFrame = function() {
+      return this._currentFrame;
+    };
+
+    SpriteSheet.prototype.getTotalFrames = function() {
+      return this._totalFrames;
+    };
+
+    SpriteSheet.prototype.isPlaying = function() {
+      return this._isPlaying;
+    };
+
+    SpriteSheet.prototype.nextFrame = function() {
+      var nf;
+      nf = this._currentFrame + 1 > this._totalFrames ? this._totalFrames : this._currentFrame + 1;
+      this.gotoAndStop(nf);
+    };
+
+    SpriteSheet.prototype.prevFrame = function() {
+      var nf;
+      nf = this._currentFrame - 1 < 1 ? 1 : this._currentFrame - 1;
+      this.gotoAndStop(nf);
+    };
+
+    SpriteSheet.prototype.play = function() {
+      this._ut = new Date().getTime();
+      Render.addListener(this);
+      this._isPlaying = true;
+      if (Render.getState() === 0) Render.start();
+    };
+
+    SpriteSheet.prototype.stop = function() {
+      this._isPlaying = false;
+      Render.removeListener(this);
+    };
+
+    SpriteSheet.prototype.update = function(ct) {
+      if (ct < this._ut + this._fps) return;
+      this._ut = ct;
+      ++this._currentFrame;
+      if (this._currentFrame > this._totalFrames) {
+        this._currentFrame = this._totalFrames;
+        this._draw();
+        this._isPlaying = false;
+        Render.removeListener(this);
+        return;
+      }
+      return this._draw();
+    };
+
+    SpriteSheet.prototype._draw = function() {};
+
+    return SpriteSheet;
+
+  })();
+
+  BackgroundSprite = (function() {
+
+    __extends(BackgroundSprite, SpriteSheet);
+
+    function BackgroundSprite(target, step, direction, limit, fps) {
+      if (fps == null) fps = 30;
+      this._target = target;
+      this._dir = direction;
+      this._limit = limit;
+      BackgroundSprite.__super__.constructor.call(this, target, step, fps);
+      this._init();
+    }
+
+    BackgroundSprite.prototype._init = function() {
+      this._currentFrame = 1;
+      this._totalFrames = ~~(this._limit / this._step);
+      if (this._dir === "horizontal") {
+        this._draw = this._drawHorizontal;
+      } else {
+        this._draw = this._drawVirtical;
+      }
+    };
+
+    BackgroundSprite.prototype._drawVirtical = function() {
+      var bf;
+      bf = -(this._currentFrame - 1) * this._step;
+      TrTween.prop(this._target, {
+        backgroundPositionY: bf
+      }).play();
+    };
+
+    BackgroundSprite.prototype._drawHorizontal = function() {
+      var bf;
+      bf = -(this._currentFrame - 1) * this._step;
+      TrTween.prop(this._target, {
+        backgroundPositionX: bf
+      }).play();
+    };
+
+    return BackgroundSprite;
+
+  })();
+
+  ImageSpriteSheet = (function() {
+
+    function ImageSpriteSheet(target, step) {}
+
+    return ImageSpriteSheet;
+
+  })();
+
+  window.jp = window.jp || {};
+
+  window.jp.contents = window.jp.contents || {};
+
+  window.jp.contents.display = window.jp.contents.display || {};
+
+  window.jp.contents.display.SpriteSheet = SpriteSheet;
 
 }).call(this);

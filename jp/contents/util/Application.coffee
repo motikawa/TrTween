@@ -26,6 +26,7 @@ class Application
 		ua = navigator.userAgent.toUpperCase()
 		isMobile = false
 		isIOS    = false
+		isKA	 = false
 		if ua.indexOf("CHROME") > -1
 			bName = BrowserName.Chrome
 			ua.match(/CHROME\/(\d+(\.\d+)+)/ig);
@@ -55,6 +56,8 @@ class Application
 			osVar = Number(osVar)
 			osName = OSName.Android
 			isMobile = true
+			if osVar < 400
+				isKA = true
 		else if ua.indexOf("IPHONE") > -1
 			ua.match(/IPHONE OS (\w+){1,3}/g)
 			osVar = (RegExp.$1.replace(/_/g, '') + '00').slice(0, 3)
@@ -88,6 +91,7 @@ class Application
 		Application._osVersion = osVar
 		Application._isMobile = isMobile
 		Application._isiOS = isIOS
+		Application._isKAnd = isKA
 		Application._browserInfo = {name:Application._browserName,version:parseFloat(Application._browserVersion)}
 		Application._osInfo = {name:Application._osName,version:Application._osVersion}
 	@getBrowserInfo:->
@@ -102,6 +106,10 @@ class Application
 		if !Application._browserInfo
 			Application._init()
 		return Application._isMobile
+	@isKAndroid:->
+		if !Application._browserInfo
+			Application._init()
+		return Application._isKAnd
 	@isiOS:->
 		if !Application._browserInfo
 			Application._init()
