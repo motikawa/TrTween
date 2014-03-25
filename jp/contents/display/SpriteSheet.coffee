@@ -1,9 +1,10 @@
 TrTween = jp.contents.TrTween.TrTween
 Render  = jp.contents.TrTween.Render
+APP     = window.jp.contents.util.Application
 class SpriteSheet
-	constructor:(target,step,fps = 30)->
+	constructor:(target,rect,isloop = false,fps = 30)->
 		@_target = target
-		@_step = step
+		@_rect = rect
 		@_fps = 1000 / fps
 		@_isPlaying = false
 		@_ut = 0
@@ -19,9 +20,12 @@ class SpriteSheet
 		@rotationX = 0
 		@rotationY = 0
 		@rotationZ = 0
+		@frame = 1
+		@_isLoop = isloop
+
 		@updaters = {
+			frame:@onUpdateFrame
 			x:=>
-				
 				@_updateParams.push("x")
 				@updaters.x = @onParamUpdate
 				@onParamUpdate()
@@ -72,6 +76,11 @@ class SpriteSheet
 				@onParamUpdate()
 				return
 		}
+	onUpdateFrame:->
+		frame = if @frame < 1 then 1 else if @frame > @_totalFrames then @_totalFrames else @frame
+		@_currentFrame = ~~(frame)
+		@_draw()
+		return
 	onParamUpdate:->
 		if ++@_udcount is @_updateParams.length 
 			@_udcount = 0
@@ -83,7 +92,7 @@ class SpriteSheet
 		return
 	gotoAndPlay:(frame)->
 		frame = if frame < 1 then 1 else if frame > @_totalFrames then @_totalFrames else frame
-		@_currentFrame = frame
+		@frame = @_currentFrame = frame
 		@_draw()
 		@_ut = new Date().getTime()
 		if !@_isPlaying
@@ -97,7 +106,7 @@ class SpriteSheet
 			Render.removeListener(@)
 		@_isPlaying = false
 		frame = if frame < 1 then 1 else if frame > @_totalFrames then @_totalFrames else frame
-		@_currentFrame = frame
+		@frame = @_currentFrame = frame
 		@_draw()
 		return
 	getCurrentFrame:->
@@ -133,21 +142,22 @@ class SpriteSheet
 		++@_currentFrame
 
 		if @_currentFrame > @_totalFrames
-			@_currentFrame = @_totalFrames
-			@_draw()
-			@_isPlaying = false
-			Render.removeListener(@)
+			if !@_isLoop
+				@frame = @_currentFrame = @_totalFrames
+				@_draw()
+				@_isPlaying = false
+				Render.removeListener(@)
+			else
+				@frame = @_currentFrame = 1
+				@_draw()
 			return
 
 		@_draw()
 	_draw:->
 
 class BackgroundSprite extends SpriteSheet
-	constructor:(target,step,direction,limit,fps = 30)->
-		@_target = target
-		@_dir = direction
-		@_limit = limit
-		super(target,step,fps)
+	constructor:(target,rect,limit,isloop = false,fps = 30)->
+		super(target,rect,fps,isloop)
 
 		@_init()
 
@@ -155,23 +165,45 @@ class BackgroundSprite extends SpriteSheet
 	_init:->
 		@_currentFrame = 1
 		@_totalFrames = ~~(@_limit / @_step)
-		if @_dir is "horizontal"
-			@_draw = @_drawHorizontal
-		else
-			@_draw = @_drawVirtical
-		return
-	_drawVirtical:->
+	_draw:->
 		bf = -(@_currentFrame - 1) * @_step
 		TrTween.prop(@_target,{backgroundPositionY:bf}).play()
 		return
-	_drawHorizontal:->
-		bf = -(@_currentFrame - 1) * @_step
-		TrTween.prop(@_target,{backgroundPositionX:bf}).play()
+	
+class ImageSpriteSheet extends SpriteSheet
+	constructor:(target,rect,isloop = false,fps = 30)->
+		super(target,rect,isloop,fps)
+		@_img = target.getElementsByTagName("img")[0]
+		@_iw = @_ih = 0
+		@_currentFrame = 1
+		if !@_img?
+			throw new Error("Image not found!")
+
+		if @_img.width is 0
+			@_img.onload = =>
+				@_init()
+		else
+			@_init()
+
+	_init:->
+		if APP.isFIE()
+			@_draw = @_drawIE
+		@_iw = @_img.width / @_rect.width
+		@_ih = @_img.height / @_rect.height
+
+		@_totalFrames = @_iw * @_ih
 		return
-class ImageSpriteSheet
-	constructor:(target,step)->
-
-
+	_draw:->
+		bfx = -((@_currentFrame - 1) % @_iw) * @_rect.width
+		bfy = -(~~((@_currentFrame - 1) / @_iw)) * @_rect.height
+ 
+		TrTween.prop(@_img,{x:bfx,y:bfy}).play()
+		return
+	_drawIE:->
+		bfx = -((@_currentFrame - 1) % @_iw) * @_rect.width
+		bfy = -(~~((@_currentFrame - 1) / @_iw)) * @_rect.height
+		TrTween.prop(@_img,{left:bfx,top:bfy}).play()
+		return
 
 
 
@@ -179,3 +211,4 @@ window.jp = window.jp || {}
 window.jp.contents = window.jp.contents || {}
 window.jp.contents.display = window.jp.contents.display || {}
 window.jp.contents.display.SpriteSheet = SpriteSheet
+window.jp.contents.display.ImageSpriteSheet = ImageSpriteSheet

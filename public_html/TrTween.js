@@ -2,7 +2,7 @@
 
   'use strict';
 
-  var APP_BROWSER, APP_OS, AnimationTween, Application, Back, BackEaseIn, BackEaseInOut, BackEaseInOutWith, BackEaseInWith, BackEaseOut, BackEaseOutIn, BackEaseOutInWith, BackEaseOutWith, BackgroundSprite, BasicTween, BezierSegment, BezierTween, Bounce, BounceEaseIn, BounceEaseInOut, BounceEaseOut, BounceEaseOutIn, BrowserName, CSS2W, CSS3Easing, ChangeUnitTween, Circ, CircEaseIn, CircEaseInOut, CircEaseOut, CircEaseOutIn, Cubic, CubicEaseIn, CubicEaseInOut, CubicEaseOut, CubicEaseOutIn, CustomEase, DelayTween, Delegate, EasingTween, Elastic, ElasticEaseIn, ElasticEaseInOut, ElasticEaseInOutWith, ElasticEaseInWith, ElasticEaseOut, ElasticEaseOutIn, ElasticEaseOutInWith, ElasticEaseOutWith, Expo, ExpoEaseIn, ExpoEaseInOut, ExpoEaseOut, ExpoEaseOutIn, FSW, FuncTween, ICSSTween, IEasing, ITween, ITweenGroup, ImageSpriteSheet, Linear, LinearEaseNone, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Quad, QuadEaseIn, QuadEaseInOut, QuadEaseOut, QuadEaseOutIn, Quart, QuartEaseIn, QuartEaseInOut, QuartEaseOut, QuartEaseOutIn, Quint, QuintEaseIn, QuintEaseInOut, QuintEaseOut, QuintEaseOutIn, Render, RepeatTween, SerialTween, Sine, SineEaseIn, SineEaseInOut, SineEaseOut, SineEaseOutIn, SpriteSheet, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, getEasingByString, isFIE, isIOS, requestAnimationFrame;
+  var APP, APP_BROWSER, APP_OS, AnimationTween, Application, Back, BackEaseIn, BackEaseInOut, BackEaseInOutWith, BackEaseInWith, BackEaseOut, BackEaseOutIn, BackEaseOutInWith, BackEaseOutWith, BackgroundSprite, BasicTween, BezierSegment, BezierTween, Bounce, BounceEaseIn, BounceEaseInOut, BounceEaseOut, BounceEaseOutIn, BrowserName, CSS2W, CSS3Easing, ChangeUnitTween, Circ, CircEaseIn, CircEaseInOut, CircEaseOut, CircEaseOutIn, Cubic, CubicEaseIn, CubicEaseInOut, CubicEaseOut, CubicEaseOutIn, CustomEase, DelayTween, Delegate, EasingTween, Elastic, ElasticEaseIn, ElasticEaseInOut, ElasticEaseInOutWith, ElasticEaseInWith, ElasticEaseOut, ElasticEaseOutIn, ElasticEaseOutInWith, ElasticEaseOutWith, Expo, ExpoEaseIn, ExpoEaseInOut, ExpoEaseOut, ExpoEaseOutIn, FSW, FuncTween, ICSSTween, IEasing, ITween, ITweenGroup, ImageSpriteSheet, Linear, LinearEaseNone, LinkedList, OSName, ObjectMapper, ParallelTween, PropertyMapper, PropertyTween, Quad, QuadEaseIn, QuadEaseInOut, QuadEaseOut, QuadEaseOutIn, Quart, QuartEaseIn, QuartEaseInOut, QuartEaseOut, QuartEaseOutIn, Quint, QuintEaseIn, QuintEaseInOut, QuintEaseOut, QuintEaseOutIn, Render, RepeatTween, SerialTween, Sine, SineEaseIn, SineEaseInOut, SineEaseOut, SineEaseOutIn, SpriteSheet, TSW, TrTween, TransitionTween, TweenState, VenderInfo, WaitTween, cancelAnimationFrame, getEasingByString, isFIE, isIOS, requestAnimationFrame;
   var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   BrowserName = {
@@ -2404,6 +2404,8 @@
       this.marginTop = NaN;
       this.marginBottom = NaN;
       this.marginRight = NaN;
+      this.scrollTop = NaN;
+      this.scrollLeft = NaN;
       this.backgroundPositionX = NaN;
       this.backgroundPositionY = NaN;
       this.visible = "NONE";
@@ -2440,6 +2442,60 @@
           }
           c[name] = to[name] - fp;
           from[name] = fp;
+          if (fixOnly) continue;
+          f = tl.getFirst();
+          find = false;
+          while (f) {
+            if (f.elm.name === name) {
+              find = true;
+              f.elm.tween = tween;
+              break;
+            }
+            f = f.next;
+          }
+          if (!find) {
+            tl.push({
+              name: name,
+              tween: tween
+            });
+          }
+        } else if (name === "scrollTop") {
+          fp = 0;
+          if (from && !isNaN(from[name])) {
+            fp = from[name];
+          } else {
+            fp = this._target.scrollTop || 0;
+          }
+          from[name] = fp;
+          c[name] = to[name] - fp;
+          tl = this._tweens || (this._tweens = new LinkedList());
+          if (fixOnly) continue;
+          f = tl.getFirst();
+          find = false;
+          while (f) {
+            if (f.elm.name === name) {
+              find = true;
+              f.elm.tween = tween;
+              break;
+            }
+            f = f.next;
+          }
+          if (!find) {
+            tl.push({
+              name: name,
+              tween: tween
+            });
+          }
+        } else if (name === "scrollLeft") {
+          fp = 0;
+          if (from && !isNaN(from[name])) {
+            fp = from[name];
+          } else {
+            fp = this._target.scrollLeft || 0;
+          }
+          from[name] = fp;
+          c[name] = to[name] - fp;
+          tl = this._tweens || (this._tweens = new LinkedList());
           if (fixOnly) continue;
           f = tl.getFirst();
           find = false;
@@ -2555,6 +2611,60 @@
               tween: tween
             });
           }
+        } else if (name === "scrollTop") {
+          fp = 0;
+          if (from && !isNaN(from[name])) {
+            fp = from[name];
+          } else {
+            fp = this._target.scrollTop || 0;
+          }
+          from[name] = fp;
+          c[name] = to[name] - fp;
+          tl = this._tweens || (this._tweens = new LinkedList());
+          if (fixOnly) continue;
+          f = tl.getFirst();
+          find = false;
+          while (f) {
+            if (f.elm.name === name) {
+              find = true;
+              f.elm.tween = tween;
+              break;
+            }
+            f = f.next;
+          }
+          if (!find) {
+            tl.push({
+              name: name,
+              tween: tween
+            });
+          }
+        } else if (name === "scrollLeft") {
+          fp = 0;
+          if (from && !isNaN(from[name])) {
+            fp = from[name];
+          } else {
+            fp = this._target.scrollLeft || 0;
+          }
+          from[name] = fp;
+          c[name] = to[name] - fp;
+          tl = this._tweens || (this._tweens = new LinkedList());
+          if (fixOnly) continue;
+          f = tl.getFirst();
+          find = false;
+          while (f) {
+            if (f.elm.name === name) {
+              find = true;
+              f.elm.tween = tween;
+              break;
+            }
+            f = f.next;
+          }
+          if (!find) {
+            tl.push({
+              name: name,
+              tween: tween
+            });
+          }
         }
       }
       Render.addListener(this);
@@ -2563,10 +2673,14 @@
 
     PropertyMapper.prototype._applyStyles = function() {
       this._target.style.cssText = this.transitionStr + this._css2W.toStyleString() + this._flWrapper.toStyleString() + this._trWrapper.toStyleString();
+      if (!isNaN(this.scrollTop)) this._target.scrollTop = this.scrollTop;
+      if (!isNaN(this.scrollLeft)) this._target.scrollLeft = this.scrollLeft;
     };
 
     PropertyMapper.prototype._applyStylesForFIE = function() {
       this._target.style.cssText = this._css2W.toStyleString();
+      if (!isNaN(this.scrollTop)) this._target.scrollTop = this.scrollTop;
+      if (!isNaN(this.scrollLeft)) this._target.scrollLeft = this.scrollLeft;
     };
 
     PropertyMapper.prototype.changeUnit = function(props) {
@@ -2665,6 +2779,21 @@
           fn.apply(this._target, [this[n]]);
         }
         f = f.next;
+      }
+    };
+
+    ObjectMapper.prototype.applyProperties = function(properties, applyStyle) {
+      var change, fn, name;
+      for (name in properties) {
+        if (this[name] !== null) {
+          change = true;
+          this[name] = properties[name];
+          this._target[name] = properties[name];
+          if (this._target.updaters && this._target.updaters[name]) {
+            fn = this._target.updaters[name];
+            fn.apply(this._target, [this[name]]);
+          }
+        }
       }
     };
 
@@ -4086,13 +4215,16 @@
 
   Render = jp.contents.TrTween.Render;
 
+  APP = window.jp.contents.util.Application;
+
   SpriteSheet = (function() {
 
-    function SpriteSheet(target, step, fps) {
+    function SpriteSheet(target, rect, isloop, fps) {
       var _this = this;
+      if (isloop == null) isloop = false;
       if (fps == null) fps = 30;
       this._target = target;
-      this._step = step;
+      this._rect = rect;
       this._fps = 1000 / fps;
       this._isPlaying = false;
       this._ut = 0;
@@ -4108,7 +4240,10 @@
       this.rotationX = 0;
       this.rotationY = 0;
       this.rotationZ = 0;
+      this.frame = 1;
+      this._isLoop = isloop;
       this.updaters = {
+        frame: this.onUpdateFrame,
         x: function() {
           _this._updateParams.push("x");
           _this.updaters.x = _this.onParamUpdate;
@@ -4162,11 +4297,16 @@
       };
     }
 
+    SpriteSheet.prototype.onUpdateFrame = function() {
+      var frame;
+      frame = this.frame < 1 ? 1 : this.frame > this._totalFrames ? this._totalFrames : this.frame;
+      this._currentFrame = ~~frame;
+      this._draw();
+    };
+
     SpriteSheet.prototype.onParamUpdate = function() {
       var obj, val, _i, _len, _ref;
-      console.log(this._udcount);
       if (++this._udcount === this._updateParams.length) {
-        console.log("moja-", this.x, this.y, this._udcount, this._updateParams.length);
         this._udcount = 0;
         obj = {};
         _ref = this._updateParams;
@@ -4180,7 +4320,7 @@
 
     SpriteSheet.prototype.gotoAndPlay = function(frame) {
       frame = frame < 1 ? 1 : frame > this._totalFrames ? this._totalFrames : frame;
-      this._currentFrame = frame;
+      this.frame = this._currentFrame = frame;
       this._draw();
       this._ut = new Date().getTime();
       if (!this._isPlaying) {
@@ -4194,7 +4334,7 @@
       if (this._isPlaying) Render.removeListener(this);
       this._isPlaying = false;
       frame = frame < 1 ? 1 : frame > this._totalFrames ? this._totalFrames : frame;
-      this._currentFrame = frame;
+      this.frame = this._currentFrame = frame;
       this._draw();
     };
 
@@ -4235,14 +4375,21 @@
     };
 
     SpriteSheet.prototype.update = function(ct) {
+      console.clear();
+      console.log(ct, this._ut, this._fps);
       if (ct < this._ut + this._fps) return;
       this._ut = ct;
       ++this._currentFrame;
       if (this._currentFrame > this._totalFrames) {
-        this._currentFrame = this._totalFrames;
-        this._draw();
-        this._isPlaying = false;
-        Render.removeListener(this);
+        if (!this._isLoop) {
+          this.frame = this._currentFrame = this._totalFrames;
+          this._draw();
+          this._isPlaying = false;
+          Render.removeListener(this);
+        } else {
+          this.frame = this._currentFrame = 1;
+          this._draw();
+        }
         return;
       }
       return this._draw();
@@ -4258,38 +4405,23 @@
 
     __extends(BackgroundSprite, SpriteSheet);
 
-    function BackgroundSprite(target, step, direction, limit, fps) {
+    function BackgroundSprite(target, rect, limit, isloop, fps) {
+      if (isloop == null) isloop = false;
       if (fps == null) fps = 30;
-      this._target = target;
-      this._dir = direction;
-      this._limit = limit;
-      BackgroundSprite.__super__.constructor.call(this, target, step, fps);
+      BackgroundSprite.__super__.constructor.call(this, target, rect, fps, isloop);
       this._init();
     }
 
     BackgroundSprite.prototype._init = function() {
       this._currentFrame = 1;
-      this._totalFrames = ~~(this._limit / this._step);
-      if (this._dir === "horizontal") {
-        this._draw = this._drawHorizontal;
-      } else {
-        this._draw = this._drawVirtical;
-      }
+      return this._totalFrames = ~~(this._limit / this._step);
     };
 
-    BackgroundSprite.prototype._drawVirtical = function() {
+    BackgroundSprite.prototype._draw = function() {
       var bf;
       bf = -(this._currentFrame - 1) * this._step;
       TrTween.prop(this._target, {
         backgroundPositionY: bf
-      }).play();
-    };
-
-    BackgroundSprite.prototype._drawHorizontal = function() {
-      var bf;
-      bf = -(this._currentFrame - 1) * this._step;
-      TrTween.prop(this._target, {
-        backgroundPositionX: bf
       }).play();
     };
 
@@ -4299,7 +4431,52 @@
 
   ImageSpriteSheet = (function() {
 
-    function ImageSpriteSheet(target, step) {}
+    __extends(ImageSpriteSheet, SpriteSheet);
+
+    function ImageSpriteSheet(target, rect, isloop, fps) {
+      var _this = this;
+      if (isloop == null) isloop = false;
+      if (fps == null) fps = 30;
+      ImageSpriteSheet.__super__.constructor.call(this, target, rect, isloop, fps);
+      this._img = target.getElementsByTagName("img")[0];
+      this._iw = this._ih = 0;
+      this._currentFrame = 1;
+      if (!(this._img != null)) throw new Error("Image not found!");
+      if (this._img.width === 0) {
+        this._img.onload = function() {
+          return _this._init();
+        };
+      } else {
+        this._init();
+      }
+    }
+
+    ImageSpriteSheet.prototype._init = function() {
+      if (APP.isFIE()) this._draw = this._drawIE;
+      this._iw = this._img.width / this._rect.width;
+      this._ih = this._img.height / this._rect.height;
+      this._totalFrames = this._iw * this._ih;
+    };
+
+    ImageSpriteSheet.prototype._draw = function() {
+      var bfx, bfy;
+      bfx = -((this._currentFrame - 1) % this._iw) * this._rect.width;
+      bfy = -(~~((this._currentFrame - 1) / this._iw)) * this._rect.height;
+      TrTween.prop(this._img, {
+        x: bfx,
+        y: bfy
+      }).play();
+    };
+
+    ImageSpriteSheet.prototype._drawIE = function() {
+      var bfx, bfy;
+      bfx = -((this._currentFrame - 1) % this._iw) * this._rect.width;
+      bfy = -(~~((this._currentFrame - 1) / this._iw)) * this._rect.height;
+      TrTween.prop(this._img, {
+        left: bfx,
+        top: bfy
+      }).play();
+    };
 
     return ImageSpriteSheet;
 
@@ -4312,5 +4489,7 @@
   window.jp.contents.display = window.jp.contents.display || {};
 
   window.jp.contents.display.SpriteSheet = SpriteSheet;
+
+  window.jp.contents.display.ImageSpriteSheet = ImageSpriteSheet;
 
 }).call(this);

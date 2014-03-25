@@ -191,7 +191,7 @@ class ElasticEaseOutWith extends IEasing
 	update:(t,b,c,d)->
 		if t is 0
 			return b
-		else if (t /= d) is 1
+		if (t /= d) is 1
 			return b + c
 
 		if !@p

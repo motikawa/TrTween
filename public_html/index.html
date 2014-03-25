@@ -25,7 +25,7 @@
 			.box{
 				position: absolute;
 				/*bottom: 0;left:50%;*/
-				width: 200px;height: 200px;
+				width: 100%;height: 200px;
 				/*margin-left: -100px;*/
 			}
 			input[type=range]{
@@ -92,6 +92,7 @@
 				Back = jp.contents.easing.Back,
 				Bounce = jp.contents.easing.Bounce,
 				CustomEase = jp.contents.easing.CustomEase,
+				SpriteSheet = jp.contents.display.SpriteSheet,
 				easings = {
 					"Linear":Linear.easeNone,
 					"easeOutSine":Sine.easeOut,
@@ -146,6 +147,15 @@
 				};
 			$(document).ready(function(){
 				var name,appendstr = "",box = $("#wrapper .boxinner")[0],easing;
+
+				var mc = new SpriteSheet(box,20);
+				var tr = TrTween.tween(mc,{x:200,y:300},{x:0,y:0},1);
+				// setTimeout(function(){
+				// 	tr.stop();
+				// },1200);
+				tr.play();
+
+
 				for (name in easings)
 				{
 					appendstr += "<option value='" + name + "'>" + name + "</option>";
@@ -216,20 +226,10 @@
 					}
 					else
 					{
-						TrTween.tween(box,{x:800},{x:0},1.5,easing).play();
+						TrTween.changeUnit(box,{width:"%",backgroundPosition:"em"}).play();
+						TrTween.tween(box,{width:100},{width:0},3,easing).play();
 					}
 				});
-
-				var con = $("#ttt");
-				var subcon = con.find(".tcontainer"),
-					boxes = con.find(".tbox");
-
-				
-				TrTween.prop(boxes[0],{rotationY:0,z:50}).play();
-				TrTween.prop(boxes[1],{rotationY:90,x:-50}).play();
-				TrTween.prop(boxes[2],{rotationY:180,z:-50}).play();
-				TrTween.prop(boxes[3],{rotationY:270,x:50}).play();
-				TrTween.repeat(TrTween.tween(subcon[0],{rotationY:0,rotationX:0},{rotationY:360,rotationX:360},5),0).play()
 			});
 
 			
@@ -259,14 +259,14 @@
 		<input type="button" value="PLAY!">
 		</figure>
 		
-		<section class="threetest" id="ttt">
+		<!-- <section class="threetest" id="ttt">
 			<div class="tcontainer">
 				<div class="tbox">1</div>
 				<div class="tbox">2</div>
 				<div class="tbox">3</div>
 				<div class="tbox">4</div>
 			</div>
-		</section>
+		</section> -->
 		</section>
 	</body>
 </html>

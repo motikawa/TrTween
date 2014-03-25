@@ -194,7 +194,7 @@ class TSW
 				continue
 			obj = p[val]
 			v = ((m[val] * 1000) | 0) * .001
-			trstr += obj.prefix + v+ obj.sufix
+			trstr += obj.prefix + v + obj.sufix
 		return trstr + ";"
 
 class FSW
@@ -364,6 +364,12 @@ class CSS2W
 			sufix:"",
 			fixFunc:(m,sufix)->
 				return m.display + ";"
+		}
+		zIndex:{
+			prefix:"z-index:"
+			sufix:""
+			fixFunc:(m,sufix)->
+				return (~~(m.zIndex)) + ";"
 		}
 	}
 	@init:->

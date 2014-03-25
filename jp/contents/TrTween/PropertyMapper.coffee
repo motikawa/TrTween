@@ -34,7 +34,8 @@ class PropertyMapper
 		invert:0,
 		brightness:100,
 		contrast:100,
-		blur:0
+		blur:0,
+		zIndex:1
 	}
 	@getMapper:(target)->
 		f = PropertyMapper._targets.getFirst()
@@ -88,7 +89,9 @@ class PropertyMapper
 		@marginTop    = NaN
 		@marginBottom = NaN
 		@marginRight  = NaN
-
+		@scrollTop    = NaN
+		@scrollLeft   = NaN
+		@zIndex       = NaN
 		@backgroundPositionX = NaN
 		@backgroundPositionY = NaN
 		@visible      = "NONE"
@@ -101,7 +104,8 @@ class PropertyMapper
 		@_css2W     = new CSS2W(@)
 		
 		if isFIE
-			@registerTween = @_registerTweenForFIE
+			# @registerTween = @_registerTweenForFIE
+			@registerTween = @_registerTween
 			@applyStyles   = @_applyStylesForFIE
 		else
 			@registerTween = @_registerTween
@@ -124,6 +128,7 @@ class PropertyMapper
 				name is "marginBottom" or
 				name is "marginRight" or
 				name is "marginLeft" or
+				name is "zIndex" or 
 				name is "backgroundPositionX" or
 				name is "backgroundPositionY"
 					@_css2W.pushProperty(name)
@@ -147,6 +152,54 @@ class PropertyMapper
 						f = f.next
 					if !find
 						tl.push({name:name,tween:tween})
+				else if name is "scrollTop"
+					fp = 0
+					if from and !isNaN(from[name])
+						fp = from[name]
+					else
+						fp = @_target.scrollTop || 0
+
+					from[name] = fp
+					c[name] = to[name] - fp
+
+					tl = @_tweens || @_tweens = new LinkedList()
+					if fixOnly
+						continue
+					f = tl.getFirst()
+					find = false
+					while f
+						if f.elm.name is name
+							find = true
+							f.elm.tween = tween
+							break
+						f = f.next
+					if !find
+						tl.push({name:name,tween:tween})
+				else if name is "scrollLeft"
+					fp = 0
+					if from and !isNaN(from[name])
+						fp = from[name]
+					else
+						fp = @_target.scrollLeft || 0
+
+					from[name] = fp
+					c[name] = to[name] - fp
+
+					tl = @_tweens || @_tweens = new LinkedList()
+					if fixOnly
+						continue
+					f = tl.getFirst()
+					find = false
+					while f
+						if f.elm.name is name
+							find = true
+							f.elm.tween = tween
+							break
+						f = f.next
+					if !find
+						tl.push({name:name,tween:tween})
+			# else
+
 		Render.addListener(@)
 		return c
 	_registerTween:(tween,fixOnly = false)->
@@ -202,6 +255,7 @@ class PropertyMapper
 					name is "marginBottom" or
 					name is "marginRight" or
 					name is "marginLeft" or
+					name is "zIndex" or 
 					name is "backgroundPositionX" or
 					name is "backgroundPositionY"
 						@_css2W.pushProperty(name)
@@ -258,15 +312,68 @@ class PropertyMapper
 							f = f.next
 						if !find
 							tl.push({name:name,tween:tween})
+			else if name is "scrollTop"
+				fp = 0
+				if from and !isNaN(from[name])
+					fp = from[name]
+				else
+					fp = @_target.scrollTop || 0
 
+				from[name] = fp
+				c[name] = to[name] - fp
+
+				tl = @_tweens || @_tweens = new LinkedList()
+				if fixOnly
+					continue
+				f = tl.getFirst()
+				find = false
+				while f
+					if f.elm.name is name
+						find = true
+						f.elm.tween = tween
+						break
+					f = f.next
+				if !find
+					tl.push({name:name,tween:tween})
+			else if name is "scrollLeft"
+				fp = 0
+				if from and !isNaN(from[name])
+					fp = from[name]
+				else
+					fp = @_target.scrollLeft || 0
+
+				from[name] = fp
+				c[name] = to[name] - fp
+
+				tl = @_tweens || @_tweens = new LinkedList()
+				if fixOnly
+					continue
+				f = tl.getFirst()
+				find = false
+				while f
+					if f.elm.name is name
+						find = true
+						f.elm.tween = tween
+						break
+					f = f.next
+				if !find
+					tl.push({name:name,tween:tween})
 		Render.addListener(@)
 		return c
 
 	_applyStyles:->
 		@_target.style.cssText = @transitionStr + @_css2W.toStyleString() + @_flWrapper.toStyleString() + @_trWrapper.toStyleString()
+		if !isNaN(@scrollTop) 
+			@_target.scrollTop = @scrollTop
+		if !isNaN(@scrollLeft)
+			@_target.scrollLeft = @scrollLeft
 		return
 	_applyStylesForFIE:->
 		@_target.style.cssText = @_css2W.toStyleString()
+		if !isNaN(@scrollTop) 
+			@_target.scrollTop = @scrollTop
+		if !isNaN(@scrollLeft)
+			@_target.scrollLeft = @scrollLeft
 		return
 	changeUnit:(props)->
 		return @_css2W.changeUnit(props)
@@ -288,6 +395,7 @@ class PropertyMapper
 					name is "marginBottom" or
 					name is "marginRight" or
 					name is "marginLeft" or
+					name is "zIndex" or 
 					name is "backgroundPositionX" or
 					name is "backgroundPositionY" or
 					name is "visible" or
@@ -379,6 +487,18 @@ class ObjectMapper extends PropertyMapper
 				fn.apply(@_target,[@[n]])
 			f = f.next
 		return
+	applyProperties:(properties,applyStyle)->
+		for name of properties
+			if @[name] isnt null
+				change = true
+				@[name] = properties[name]
+				@_target[name] = properties[name]
+				if @_target.updaters and @_target.updaters[name]
+					fn = @_target.updaters[name]
+					fn.apply(@_target,[@[name]])
+		# if change and applyStyle
+		# 	@applyStyles()
+		return
 	registerTween:(tween,fixOnly = false)->
 		to = tween._to
 		from = tween._from
@@ -434,7 +554,7 @@ class ObjectMapper extends PropertyMapper
 		mcount = 0
 		while f
 			tw = f.elm.tween
-			if !tw
+			if !tw 
 				f = f.next
 				continue
 			if tw._state is TweenState.Completed
